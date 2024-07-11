@@ -1,11 +1,49 @@
 extends layout
 
 block content
-  h1= title
-  p Welcome to #{title}
-  if user
-    p Welcome #{user.name}
-    form(action='/auth/logout', method='post')
-      button(type='submit') Logout
-  else
-    a(href='/auth/login/federated/google', class='btn btn-primary') Login with Google
+  .container
+    h1= title
+    p Welcome to #{title}
+    if user
+      p Welcome #{user.name}
+      form(action='/auth/logout', method='post')
+        button(type='submit') Logout
+    else
+      a(href='/auth/login/federated/google', class='btn btn-primary') Login with Google
+      h2 Register
+      form(action='/register', method='post')
+        div
+          label(for='firstName') First Name:
+          input(type='text', name='firstName', placeholder='First Name', required)
+        div
+          label(for='lastName') Last Name:
+          input(type='text', name='lastName', placeholder='Last Name', required)
+        div
+          label(for='email') Email:
+          input(type='email', name='email', placeholder='Email', required)
+        div
+          label(for='password') Password:
+          input(type='password', name='password', placeholder='Password', required)
+        div
+          label(for='preferredLanguage') Preferred Language:
+          input(type='text', name='preferredLanguage', placeholder='Preferred Language')
+        div
+          label(for='purpose') Purpose:
+          input(type='text', name='purpose', placeholder='Purpose')
+        div
+          label(for='organization') Organization:
+          input(type='text', name='organization', placeholder='Organization')
+        div
+          label(for='familySize') Family Size:
+          input(type='number', name='familySize', placeholder='Family Size')
+        button(type='submit') Register
+
+      h2 Login
+      form(action='/login', method='post')
+        div
+          label(for='email') Email:
+          input(type='email', name='email', placeholder='Email', required)
+        div
+          label(for='password') Password:
+          input(type='password', name='password', placeholder='Password', required)
+        button(type='submit') Login

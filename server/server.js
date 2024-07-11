@@ -11,6 +11,9 @@ import passport from "passport";
 import authRouter from "./routes/auth.js";
 import { connectDB } from './config/db.js';
 import RedisStore from "connect-redis";
+import registerRouter from "./routes/register.js";
+import loginRouter from "./routes/login.js";
+import pool, { initializeTables } from './config/sqlDB.js';
 
 // Constants
 const port = process.env.PORT || 3000;
@@ -32,6 +35,9 @@ async function startServer() {
 
     // Connect to MongoDB
     const db = await connectDB();
+
+    // Initialize SQL tables
+    await initializeTables();
     
     // Create http server
     const app = express();
@@ -72,8 +78,11 @@ async function startServer() {
       next();
     });
 
+    // Routes
     app.use("/", indexRouter);
     app.use("/auth", authRouter);
+    app.use("/register", registerRouter);
+    app.use("/login", loginRouter);
 
     // Route to print sessions for debugging
     app.get('/print-sessions', (req, res) => {

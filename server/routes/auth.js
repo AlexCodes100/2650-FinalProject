@@ -1,7 +1,10 @@
 import express from 'express';
 import passport from 'passport';
 import { Strategy as GoogleStrategy } from 'passport-google-oidc';
+import { Strategy as LocalStrategy } from 'passport-local';
+import bcrypt from 'bcrypt';
 import { connectDB } from '../config/db.js';
+import pool from '../config/sqlDB.js';
 import { ObjectId } from 'mongodb';
 
 const router = express.Router();
@@ -33,22 +36,59 @@ passport.use(new GoogleStrategy({
   }
 }));
 
+// Configure the local strategy for use by Passport.
+passport.use(new LocalStrategy(
+    { usernameField: 'email', passwordField: 'password' },
+    async (email, password, done) => {
+      try {
+        const [rows] = await pool.query(`SELECT * FROM users WHERE email = ?`, [email]);
+  
+        if (rows.length === 0) {
+          return done(null, false, { message: 'Invalid email or password' });
+        }
+  
+        const user = rows[0];
+        const match = await bcrypt.compare(password, user.password);
+  
+        if (!match) {
+          return done(null, false, { message: 'Invalid email or password' });
+        }
+  
+        return done(null, user);
+      } catch (err) {
+        return done(err);
+      }
+    }
+  ));
+
 passport.serializeUser((user, cb) => {
     console.log('Serializing user:', user); // Debug log
-    cb(null, user._id); // Store only the user ID
+    cb(null, user._id || user._id); // Store only the user ID
   });
 
+// Deserialize user instance from session
 passport.deserializeUser(async (id, cb) => {
-  console.log('Deserializing user ID:', id); // Debug log
-  try {
-    const users = db.collection('users');
-    const dbUser = await users.findOne({ _id: new ObjectId(id) });
-    console.log('Found user in DB:', dbUser); // Debug log
-    cb(null, dbUser);
-  } catch (err) {
-    cb(err);
-  }
-});
+    console.log('Deserializing user ID:', id); // Debug log
+    try {
+      // First, try to find the user in the MongoDB collection
+      if (ObjectId.isValid(id)) {
+        const users = db.collection('users');
+        const dbUser = await users.findOne({ _id: new ObjectId(id) });
+        if (dbUser) {
+          console.log('Found user in MongoDB:', dbUser); // Debug log
+          return cb(null, dbUser);
+        }
+      }
+      
+      // If not found in MongoDB, try to find the user in the SQL database
+      const [rows] = await pool.query(`SELECT * FROM users WHERE id = ?`, [id]);
+      const user = rows[0];
+      console.log('Found user in SQL DB:', user); // Debug log
+      cb(null, user);
+    } catch (err) {
+      cb(err);
+    }
+  });
 
 // Route to initiate Google login
 router.get('/login/federated/google', passport.authenticate('google'));
@@ -58,6 +98,12 @@ router.get('/oauth2/redirect/google', passport.authenticate('google', {
   successReturnToOrRedirect: '/',
   failureRedirect: '/login'
 }));
+
+// Route to handle local login
+router.post('/login', passport.authenticate('local', {
+    successReturnToOrRedirect: '/',
+    failureRedirect: '/login'
+  }));
 
 router.post('/logout', (req, res, next) => {
   req.logout((err) => {

@@ -1,5 +1,4 @@
 import './App.css';
-import { useState } from 'react';
 import {createBrowserRouter, Outlet, RouterProvider, Route, createRoutesFromElements} from "react-router-dom";
 import LandingPage from './Pages/LandingPage.js';
 import AboutPage from './Pages/AboutPage.js';
@@ -10,6 +9,8 @@ import LoginPage from './Pages/LoginPage.js';
 import ErrorPage from "./Pages/ErrorPage";
 import NavBar from './Components/NavBar.js';
 import Footer from './Components/Footer.js';
+
+
 
 const router = createBrowserRouter(
   createRoutesFromElements (
@@ -35,7 +36,7 @@ const router = createBrowserRouter(
 )
 function App() {
   return (
-    <div>
+    <div style={{ backgroundImage: `url('photos/landing-background.jpg')`, backgroundSize: 'cover', minHeight: '100vh' }}>
       <RouterProvider router={router} />
     </div>
   );

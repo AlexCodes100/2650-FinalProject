@@ -13,6 +13,7 @@ import { connectDB } from './config/db.js';
 import RedisStore from "connect-redis";
 import registerRouter from "./routes/register.js";
 import loginRouter from "./routes/login.js";
+import businessDashboardRouter from "./routes/businessDashboard.js"
 import pool, { initializeTables } from './config/sqlDB.js';
 
 // Constants
@@ -83,6 +84,8 @@ async function startServer() {
     app.use("/auth", authRouter);
     app.use("/register", registerRouter);
     app.use("/login", loginRouter);
+    app.use("/businessdashboard", businessDashboardRouter);
+
 
     // Route to print sessions for debugging
     app.get('/print-sessions', (req, res) => {

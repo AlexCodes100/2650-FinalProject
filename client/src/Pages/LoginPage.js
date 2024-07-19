@@ -44,7 +44,7 @@ function LoginPage () {
         password: password
       })
       if (response.data.result === "Login Successful") {
-        localStorage.setItem("ImmivanRole", JSON.stringify(response.data.role));
+        localStorage.setItem("ImmivanRole", JSON.stringify(response.data));
         // redirect to dashboard
         window.location.href = "/dashboard"
       } else {

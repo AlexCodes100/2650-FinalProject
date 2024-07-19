@@ -1,38 +1,72 @@
 import { useState, useEffect } from "react";
+import axios from "axios";
+import "dotenv/config.js";
 
 function BusinessDashboard () {
   const [business, setBusiness] = useState({});
+  const [changeInfo, setChangeInfo] = useState({});
   const [chatrequests, setChatRequests] = useState([{}]);
-  const [changeInfo, setChangeInfo] = useState(false);
+  const [changeInfoMode, setChangeInfoMode] = useState(false);
+  const [error, setError] = useState(false);
 
   useEffect(() => {
     // fetch business data
-    const result = {};
-    setBusiness(result);
+    const serverAddress = process.env.SERVERADDRESS;
+    const data = JSON.parse(localStorage.getItem('ImmivanRole'));
+    setBusiness(data);
+    setChangeInfo(data);
+
     // fetch chat
-    const chats = [{}];
-    setChatRequests(chats);
-    // forEach interestedCompanies, fetch their posts. Sort by date (newest to oldest)
-    const companiesPosts = [{}];
-    setPosts(companiesPosts)
+    let chats = [{}];
+    (async () => {
+      chats = await axios.get(`${serverAddress}/chats/:id`)
+      setChatRequests(chats);
+    })();
+    
+    // business post
+    let companiesPosts = [{}];
+    (async () => {
+      companiesPosts = await axios.get(`${serverAddress}/posts/:id`)
+      setPosts(companiesPosts);
+    })();
   }, []);
 
   // Event Handlers
   const changeBusinessInfoHandler = () => {
-    setChangeInfo(true);
+    setChangeInfoMode(true);
   }
 
-  const updateBusinessInfoHandler = (e) => {
-    e.preventDefault();
-    // Handle the update business info logic here (e.g., send a request to the server)
-    setChangeInfo(false);
-  };
+  const cancelInputChangeHandler = () => {
+    setChangeInfoMode(false);
+    setError(false);
+  }
 
   const inputChangeHandler = (e) => {
-    setBusiness({
-      ...business,
-      [e.target.name]: e.target.value
-    });
+    const { name, value } = e.target;
+    setChangeInfo((prevData) =>({
+      ...prevData,
+      [name]: value
+    }));
+  };
+
+  const submitUpdatedBusinessInfoHandler = async (e) => {
+    e.preventDefault();
+    // Handle the update business info logic here (e.g., send a request to the server)
+    let updatedInfo = changeInfo
+    try {
+      let result = await axios.put(`${serverAddress}/business/:id`, {updatedInfo});
+      if (result.data[0].result === "successful") {
+        console.log(result.data[0].message)
+        setChangeInfoMode(false);
+      } else {
+        setError(true);
+        console.log(result.data[0].message)
+      }
+      
+    } catch (err) {
+      console.log("Error occured during updating business info: ", err)
+    }
+    
   };
 
   // Contents
@@ -50,7 +84,7 @@ function BusinessDashboard () {
   );
 
   const updatingBusinessInfo = (
-    <form onSubmit={updateBusinessInfoHandler}>
+    <form onSubmit={submitUpdatedBusinessInfoHandler}>
       <div>
         <label htmlFor="business">Business type:</label>
         <input
@@ -100,7 +134,11 @@ function BusinessDashboard () {
           onChange={inputChangeHandler}
         />
       </div>
+      <div>
+        {error? <p style={{ color: "red" }}>Error occur while updating. Please try again. If the error continues, please contact us.</p>:<></>}
+      </div>
       <button type="submit">Save Changes</button>
+      <button type="button" onClick={cancelInputChangeHandler}>Cancel</button>
     </form>
   );
 
@@ -119,7 +157,7 @@ function BusinessDashboard () {
       <h1>Hi {business.displayname}</h1>
       <section className="business info">
         <h3>{business.displayname}</h3>
-        {changeInfo? {updatingBusinessInfo}: {businessInfo}}
+        {changeInfoMode? {updatingBusinessInfo}: {businessInfo}}
       </section>
       <section className="Chatboxes">
         {clientChats}

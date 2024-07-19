@@ -5,9 +5,9 @@ function Dashboard () {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const role = JSON.parse(localStorage.getItem('ImmivanRole'));
-    if (role) {
-      switch (role) {
+    const data = JSON.parse(localStorage.getItem('ImmivanRole'));
+    if (data.role) {
+      switch (data.role) {
         case "client":
           navigate("/clientDashboard");
           break;

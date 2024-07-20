@@ -29,20 +29,20 @@ cd ../server
 ```
 ## For the server create a .env file with the following variables:
 ```
-PORT=
+PORT=3000
 GOOGLE_CLIENT_ID=
 GOOGLE_CLIENT_SECRET=
-SESSION_SECRET=
-REDIS_HOST=
-REDIS_PORT=
-REDIS_PASSWORD=
-MONGODB_URI=
-SQL_HOST=
+SESSION_SECRET=cd1f3add13cb5fcaa12f3f8ba818c4b2d35d798920276dbe0483a6560f4cf31f57618a07d37e8676c597a425ba236c3137483fa16d6cf888e6c616e0898a85ac
+REDIS_HOST=127.0.0.1
+REDIS_PORT=6379
+REDIS_PASSWORD=''
+SQL_HOST=localhost
 SQL_USER=
 SQL_PASSWORD=
-SQL_DATABASE=
+SQL_DATABASE=db
+CORS_ORIGIN=http://localhost:4000
 ```
-## You will need to have running a redis server, a mysql database and a connection to a mongodb atlas database.
+## You will need to have running a redis server and a mysql database.
 
 ## After that just do npm install followed by npm start to setup the server.
 ```

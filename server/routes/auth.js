@@ -3,31 +3,29 @@ import passport from 'passport';
 import { Strategy as GoogleStrategy } from 'passport-google-oidc';
 import { Strategy as LocalStrategy } from 'passport-local';
 import bcrypt from 'bcrypt';
-import { connectDB } from '../config/db.js';
 import pool from '../config/sqlDB.js';
-import { ObjectId } from 'mongodb';
+import crypto from 'crypto';
 
 const router = express.Router();
-let db;
-
-// Ensure the database connection is established
-(async () => {
-  db = await connectDB();
-})();
 
 // Configure the Google strategy for use by Passport.
 passport.use(new GoogleStrategy({
   clientID: process.env.GOOGLE_CLIENT_ID,
   clientSecret: process.env.GOOGLE_CLIENT_SECRET,
   callbackURL: 'http://localhost:3000/auth/oauth2/redirect/google',
-  scope: ['profile']
+  scope: ['profile', 'email']
 }, async (issuer, profile, cb) => {
   try {
-    const users = db.collection('users');
-    let user = await users.findOne({ name: profile.displayName });
-    if (!user) {
-      const result = await users.insertOne({ name: profile.displayName });
-      user = { id: result.insertedId, name: profile.displayName };
+    const [rows] = await pool.query(`SELECT * FROM users WHERE email = ?`, [profile.emails[0].value]);
+    let user;
+    if (rows.length === 0) {
+      const placeholderPassword = crypto.randomBytes(16).toString('hex'); // Generate a random placeholder password
+      const hashedPassword = await bcrypt.hash(placeholderPassword, 10); // Hash the placeholder password
+      const [result] = await pool.query(`INSERT INTO users (firstName, lastName, email, password) VALUES (?, ?, ?, ?)`, 
+        [profile.name.givenName, profile.name.familyName, profile.emails[0].value, hashedPassword]);
+      user = { id: result.insertId, firstName: profile.name.givenName, lastName: profile.name.familyName, email: profile.emails[0].value };
+    } else {
+      user = rows[0];
     }
     console.log('Authenticated user:', user); // Debug log
     return cb(null, user);
@@ -62,33 +60,22 @@ passport.use(new LocalStrategy(
   ));
 
 passport.serializeUser((user, cb) => {
-    console.log('Serializing user:', user); // Debug log
-    cb(null, user._id || user._id); // Store only the user ID
-  });
+  console.log('Serializing user:', user); // Debug log
+  cb(null, user.id); // Ensure the ID is correctly passed
+});
 
 // Deserialize user instance from session
 passport.deserializeUser(async (id, cb) => {
-    console.log('Deserializing user ID:', id); // Debug log
-    try {
-      // First, try to find the user in the MongoDB collection
-      if (ObjectId.isValid(id)) {
-        const users = db.collection('users');
-        const dbUser = await users.findOne({ _id: new ObjectId(id) });
-        if (dbUser) {
-          console.log('Found user in MongoDB:', dbUser); // Debug log
-          return cb(null, dbUser);
-        }
-      }
-      
-      // If not found in MongoDB, try to find the user in the SQL database
-      const [rows] = await pool.query(`SELECT * FROM users WHERE id = ?`, [id]);
-      const user = rows[0];
-      console.log('Found user in SQL DB:', user); // Debug log
-      cb(null, user);
-    } catch (err) {
-      cb(err);
-    }
-  });
+  console.log('Deserializing user ID:', id); // Debug log
+  try {
+    const [rows] = await pool.query(`SELECT * FROM users WHERE id = ?`, [id]);
+    const user = rows[0];
+    console.log('Found user in SQL DB:', user); // Debug log
+    cb(null, user);
+  } catch (err) {
+    cb(err);
+  }
+});
 
 // Route to initiate Google login
 router.get('/login/federated/google', passport.authenticate('google'));

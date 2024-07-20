@@ -18,7 +18,7 @@ async function initializeTables() {
       firstName VARCHAR(50) NOT NULL,
       lastName VARCHAR(50) NOT NULL,
       email VARCHAR(100) UNIQUE NOT NULL,
-      password VARCHAR(100) NOT NULL,
+      password VARCHAR(100) DEFAULT NULL,
       preferredLanguage VARCHAR(20),
       purpose TEXT,
       organization VARCHAR(100),

@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 // import "dotenv/config.js";
 
-function BusinessDashboard () {
+function BusinessDashBoard () {
   const [business, setBusiness] = useState({});
   const [changeInfo, setChangeInfo] = useState({});
   const [chatrequests, setChatRequests] = useState([{}]);
@@ -180,4 +180,4 @@ function BusinessDashboard () {
   )
 }
 
-export default BusinessDashboard;
+export default BusinessDashBoard;

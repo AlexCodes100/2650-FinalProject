@@ -8,6 +8,7 @@ function LandingPage() {
       <Container>
         
         <Card style={{ fontWeight: 'bold',backgroundColor: 'rgba(255, 228, 225, 0.5)', border: 'none', padding: '20px' }}>
+        {/* <Card style={{ fontWeight: 'bold',backgroundColor: '#FFE4C4', border: 'none', padding: '20px' }}> */}
           <section className="text-center my-5">
             <h3>Our Purpose</h3>
             <ul className="list-unstyled">

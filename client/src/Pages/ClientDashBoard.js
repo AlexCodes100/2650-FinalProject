@@ -1,42 +1,24 @@
-import { useState, useEffect } from "react";
+import React, {useContext} from "react";
+import UserContext from "./UserContext";
+import UserProfile from "./UserProfile";
+import RecommendedCompanies from "./RecommendedCompanies";
+import FollowedCompanies from "./FollowedCompanies";
+import Posts from "./Posts";
 
-function ClientDashboard () {
-  const [user, setUser] = useState({});
-  const [defaultFetch, setDefaultFetch] = useState([{}]);
-  const [interestedCompanies, setInterestedCompanies] = useState([{}]);
-  const [posts, setPosts] = useState([{}])
 
-  useEffect(() => {
-    // fetch user data
-    const result = {};
-    setUser(result);
-    // fetch recommanded companies
-    const recommandedCompany = [{}];
-    setDefaultFetch(recommandedCompany);
-    // fetch followed companies
-    const followedCompanies = [{}];
-    setInterestedCompanies(followedCompanies);
-    // forEach interestedCompanies, fetch their posts. Sort by date (newest to oldest)
-    const companiesPosts = [{}];
-    setPosts(companiesPosts)
-  }, []);
+  function ClientDashboard() {
+    const { user, recommendedCompanies, followedCompanies, posts } = useContext(UserContext);
+ 
 
   return (
-    <>
-      <h1>Hi {user.displayname}</h1>
-      <section className="posts">
-        {posts}
-      </section>
-      <section className="recommandedCompanies">
-        {defaultFetch}
-        {/* business name, logo, business type, brief description, link to business page */}
-      </section>
-      <section className="interestedCompanies">
-        {interestedCompanies}
-        {/* business name, logo */}
-      </section>
-    </>
-  )
+
+    <div className="client-dashboard">
+      <UserProfile user={user} />
+      <RecommendedCompanies companies={recommendedCompanies} />
+      <FollowedCompanies companies={followedCompanies} />
+      <Posts posts={posts} />
+    </div>
+  );
 }
 
 export default ClientDashboard;

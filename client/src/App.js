@@ -9,6 +9,9 @@ import LoginPage from './Pages/LoginPage.js';
 import ErrorPage from "./Pages/ErrorPage";
 import NavBar from './Components/NavBar.js';
 import Footer from './Components/Footer.js';
+import Dashboard from "./Pages/Dashboard.js";
+import ClientDashboard from "./Pages/ClientDashBoard.js";
+import BusinessDashboard from "./Pages/BusinessDashBoard.js";
 
 
 
@@ -30,6 +33,9 @@ const router = createBrowserRouter(
         <Route path="/" element={<LandingPage />} />
         <Route path="/about" element={<AboutPage />} />
         <Route path="/errorPage" element={<ErrorPage />} />
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/clientDashboard" element={<ClientDashboard />} />
+        <Route path="/businessDashboard" element={<BusinessDashboard />} />
       </Route>
       </>
   )
@@ -37,6 +43,7 @@ const router = createBrowserRouter(
 function App() {
   return (
     <div style={{ backgroundImage: `url('photos/landing-background.jpg')`, backgroundSize: 'cover', minHeight: '100vh' }}>
+    {/* <div style={{ backgroundColor: '#F4A460	', minHeight: '100vh' }}>  */}
       <RouterProvider router={router} />
     </div>
   );

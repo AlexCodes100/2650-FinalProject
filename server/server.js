@@ -12,11 +12,14 @@ import authRouter from "./routes/auth.js";
 import RedisStore from "connect-redis";
 import registerRouter from "./routes/register.js";
 import loginRouter from "./routes/login.js";
-import { initializeTables } from './config/sqlDB.js';
-import cors from 'cors';
+import businessDashboardRouter from "./routes/businessDashboard.js"
+import  { initializeTables } from './config/sqlDB.js';
+
+import cors from "cors";
+
 
 // Constants
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 4000;
 
 
 // Redis Client Setup
@@ -82,9 +85,11 @@ async function startServer() {
 
     // Routes
     app.use("/", indexRouter);
-    app.use("/auth", authRouter);
+    // app.use("/auth", authRouter);
     app.use("/register", registerRouter);
     app.use("/login", loginRouter);
+    app.use("/businessdashboard", businessDashboardRouter);
+
 
     // Route to print sessions for debugging
     app.get('/print-sessions', (req, res) => {

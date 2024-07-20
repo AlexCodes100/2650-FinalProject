@@ -22,7 +22,7 @@ function LoginPage () {
         email: userName,
         password: password
       })
-      if (response.data.result === "Login Successful") {
+      if (response.data[0].result === "Login Successful") {
         localStorage.setItem("ImmivanRole", JSON.stringify(response.data.role));
         // redirect to dashboard
         window.location.href = "/dashboard"
@@ -36,10 +36,10 @@ function LoginPage () {
     }
   }
 
-  const businessLoginHandler = (e) => {
+  const businessLoginHandler = async (e) => {
     e.preventDefault();
     try {
-      const response = axios.post("", {
+      const response = await axios.post("http://localhost:4000/businessdashboard", {
         email: userName,
         password: password
       })
@@ -86,7 +86,7 @@ function LoginPage () {
   const businessLoginUI = (
     <form id="loginForm" method="POST" action="/businesslogin" onSubmit={businessLoginHandler}>
       <div>
-        <label htmlFor="email">Email Address:</label>
+        <label htmlFor="email">Business Email Address:</label>
         <input type="email" id="email" name="email" aria-required="true" onChange={usernameInputHandler}required />
       </div>
       <div>
@@ -102,8 +102,8 @@ function LoginPage () {
   return (
     <>
       <h1>User Login</h1>
-      <button onclick={clientRoleChangeHandler}>Client Login</button>
-      <button onChange={businessRoleChangeHandler}>Business Login</button>
+      <button onClick={clientRoleChangeHandler}>Client Login</button>
+      <button onClick={businessRoleChangeHandler}>Business Login</button>
       {role === "client"? clientLoginUI:businessLoginUI}
     </>
   )

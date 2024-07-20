@@ -1,48 +1,93 @@
 import { useState, useEffect } from "react";
+import axios from "axios";
+// import "dotenv/config.js";
 
 function BusinessDashBoard () {
   const [business, setBusiness] = useState({});
+  const [changeInfo, setChangeInfo] = useState({});
   const [chatrequests, setChatRequests] = useState([{}]);
-  const [changeInfo, setChangeInfo] = useState(false);
+  const [changeInfoMode, setChangeInfoMode] = useState(false);
+  const [posts, setPosts] = useState([{}])
+  const [error, setError] = useState(false);
 
   useEffect(() => {
     // fetch business data
-    const result = {};
-    setBusiness(result);
+    // const serverAddress = process.env.SERVERADDRESS;
+    const data = JSON.parse(localStorage.getItem('ImmivanRole'));
+    setBusiness(data);
+    setChangeInfo(data);
+    console.log(data)
+
     // fetch chat
-    const chats = [{}];
-    setChatRequests(chats);
-    // forEach interestedCompanies, fetch their posts. Sort by date (newest to oldest)
+    // let chats = [{}];
+    // (async () => {
+    //   chats = await axios.get(`http://localhost:4000/chats/:id`)
+    //   setChatRequests(chats);
+    // })();
     
-    //todo ask riley about this line
-    //! const companiesPosts = [{}];
-    //! setPosts(companiesPosts) 
+    // business post
+  //   let companiesPosts = [{}];
+  //   (async () => {
+  //     companiesPosts = await axios.get(`http://localhost:4000/posts/:id`)
+  //     setPosts(companiesPosts);
+  //   })();
   }, []);
 
   // Event Handlers
   const changeBusinessInfoHandler = () => {
-    setChangeInfo(true);
+    console.log(business.id)
+    setChangeInfoMode(true);
   }
 
-  const updateBusinessInfoHandler = (e) => {
-    e.preventDefault();
-    // Handle the update business info logic here (e.g., send a request to the server)
-    setChangeInfo(false);
-  };
+  const cancelInputChangeHandler = () => {
+    setChangeInfoMode(false);
+    setError(false);
+  }
 
   const inputChangeHandler = (e) => {
-    setBusiness({
-      ...business,
-      [e.target.name]: e.target.value
-    });
+    const { name, value } = e.target;
+    setChangeInfo((prevData) =>({
+      ...prevData,
+      [name]: value
+    }));
+  };
+
+  const submitUpdatedBusinessInfoHandler = async (e) => {
+    e.preventDefault();
+    // Handle the update business info logic here (e.g., send a request to the server)
+    let updatedInfo = {};
+    updatedInfo.businessName = changeInfo.businessName;
+    updatedInfo.businessType = changeInfo.businessType;
+    updatedInfo.businessLocation = changeInfo.businessLocation;
+    updatedInfo.information = changeInfo.information;
+    updatedInfo.contactPerson = changeInfo.contactPerson;
+    updatedInfo.telephoneNumber = changeInfo.telephoneNumber;
+    updatedInfo.email = changeInfo.email;
+
+    try {
+      console.log(business.id)
+      let result = await axios.put(`http://localhost:4000/businessdashboard/${business.id}`, {updatedInfo});
+      console.log(result)
+      if (result.data[0].result === "successful") {
+        console.log(result.data[0].message)
+        setChangeInfoMode(false);
+      } else {
+        setError(true);
+        console.log(result.data[0].message)
+      }
+      
+    } catch (err) {
+      console.log("Error occured during updating business info: ", err)
+    }
+    
   };
 
   // Contents
   const businessInfo = (
     <>
       <ul>
-        <li>Business type: {business.business}</li>
-        <li>Business location: {business.location}</li>
+        <li>Business type: {business.businessType}</li>
+        <li>Business location: {business.businessLocation}</li>
         <li>Information: {business.information}</li>
         <li>Contact Person: {business.contactPerson}</li>
         <li>Contact number: {business.telephoneNumber}</li>
@@ -52,24 +97,24 @@ function BusinessDashBoard () {
   );
 
   const updatingBusinessInfo = (
-    <form onSubmit={updateBusinessInfoHandler}>
+    <form onSubmit={submitUpdatedBusinessInfoHandler}>
       <div>
-        <label htmlFor="business">Business type:</label>
+        <label htmlFor="businessType">Business type:</label>
         <input
           type="text"
-          id="business"
-          name="business"
-          value={business.business || ""}
+          id="businessType"
+          name="businessType"
+          value={changeInfo.businessType || ""}
           onChange={inputChangeHandler}
         />
       </div>
       <div>
-        <label htmlFor="location">Business location:</label>
+        <label htmlFor="businessLocation">Business location:</label>
         <input
           type="text"
-          id="location"
-          name="location"
-          value={business.location || ""}
+          id="businessLocation"
+          name="businessLocation"
+          value={changeInfo.businessLocation || ""}
           onChange={inputChangeHandler}
         />
       </div>
@@ -78,7 +123,7 @@ function BusinessDashBoard () {
         <textarea
           id="information"
           name="information"
-          value={business.information || ""}
+          value={changeInfo.information || ""}
           onChange={inputChangeHandler}
         />
       </div>
@@ -88,7 +133,7 @@ function BusinessDashBoard () {
           type="text"
           id="contactPerson"
           name="contactPerson"
-          value={business.contactPerson || ""}
+          value={changeInfo.contactPerson || ""}
           onChange={inputChangeHandler}
         />
       </div>
@@ -98,33 +143,37 @@ function BusinessDashBoard () {
           type="tel"
           id="telephoneNumber"
           name="telephoneNumber"
-          value={business.telephoneNumber || ""}
+          value={changeInfo.telephoneNumber || ""}
           onChange={inputChangeHandler}
         />
       </div>
+      <div>
+        {error? <p style={{ color: "red" }}>Error occur while updating. Please try again. If the error continues, please contact us.</p>:<></>}
+      </div>
       <button type="submit">Save Changes</button>
+      <button type="button" onClick={cancelInputChangeHandler}>Cancel</button>
     </form>
   );
 
-  let clientChats = (
-    chatrequests.map((chat) => (
-          <div key={chat.id}>
-            <p>{chat.client.displayname}</p>
-            <img src={chat.client.profilePic} />
-            <p>{chat.message[chat.message.length()-1]}</p>
-          </div>
-        ))
-  )
+  // let clientChats = (
+  //   chatrequests.map((chat) => (
+  //         <div key={chat.id}>
+  //           <p>{chat.client.displayname}</p>
+  //           <img src={chat.client.profilePic} />
+  //           <p>{chat.message[chat.message.length()-1]}</p>
+  //         </div>
+  //       ))
+  // )
 
   return (
     <>
-      <h1>Hi {business.displayname}</h1>
+      <h1>Hi {business.businessName}</h1>
       <section className="business info">
-        <h3>{business.displayname}</h3>
-        {changeInfo? {updatingBusinessInfo}: {businessInfo}}
+        <h3>{business.businessName}</h3>
+        {changeInfoMode? updatingBusinessInfo: businessInfo}
       </section>
       <section className="Chatboxes">
-        {clientChats}
+        {/* {clientChats} */}
         {/* follower name, profile pic */}
       </section>
     </>

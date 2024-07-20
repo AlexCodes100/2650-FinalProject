@@ -25,10 +25,25 @@ async function initializeTables() {
       familySize INT
     );
   `;
+  const createBusinessTableQuery = `
+    CREATE TABLE IF NOT EXISTS business (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    loginEmail VARCHAR(100) UNIQUE NOT NULL,
+    loginPassword VARCHAR(100) NOT NULL,
+    businessName VARCHAR(100) NOT NULL,
+    businessType VARCHAR(50),
+    businessLocation VARCHAR(100),
+    information TEXT,
+    contactPerson VARCHAR(100),
+    telephoneNumber VARCHAR(20),
+    email VARCHAR(100) UNIQUE
+);
+  `
 
   const connection = await pool.getConnection();
   try {
     await connection.query(createTableQuery);
+    await connection.query(createBusinessTableQuery);
     console.log('SQL tables initialized');
   } finally {
     connection.release();

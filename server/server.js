@@ -16,6 +16,9 @@ import loginRouter from "./routes/login.js";
 import businessDashboardRouter from "./routes/businessDashboard.js"
 import pool, { initializeTables } from './config/sqlDB.js';
 
+import cors from "cors";
+
+
 // Constants
 const port = process.env.PORT || 4000;
 
@@ -52,6 +55,7 @@ async function startServer() {
     app.use(express.urlencoded({ extended: true }));
     app.use(cookieParser());
     app.use(express.static(path.join("public")));
+    app.use(cors());
 
     // Session management (Redis)
     app.use(

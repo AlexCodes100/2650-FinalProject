@@ -6,6 +6,9 @@ import SignupSelectionPage from './Pages/SignUpSelectionPage.js';
 import SignupPage from './Pages/SignupPage.js'
 import LoginSelectionPage from "./Pages/LoginSelectionPage.js"
 import LoginPage from './Pages/LoginPage.js';
+import Dashboard from './Pages/Dashboard.js';
+import ClientDashboard from './Pages/ClientDashBoard.js';
+import BusinessDashboard from './Pages/BusinessDashBoard.js';
 import ErrorPage from "./Pages/ErrorPage";
 import NavBar from './Components/NavBar.js';
 import Footer from './Components/Footer.js';
@@ -20,6 +23,7 @@ const router = createBrowserRouter(
       <Route path="/login" element={<LoginPage />} />
       <Route path="/loginSelection" element={<LoginSelectionPage />} />
       <Route path="/signupSelection" element={<SignupSelectionPage />} />
+      <Route path="/dashboard" element={<Dashboard />} />
       <Route element={
         <div>
           <NavBar />
@@ -30,6 +34,8 @@ const router = createBrowserRouter(
         <Route path="/" element={<LandingPage />} />
         <Route path="/about" element={<AboutPage />} />
         <Route path="/errorPage" element={<ErrorPage />} />
+        <Route path="/clientDashboard" element={<ClientDashboard />} />
+        <Route path="/businessDashboard" element={<BusinessDashboard />} />
       </Route>
       </>
   )

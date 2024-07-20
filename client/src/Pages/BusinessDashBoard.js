@@ -1,38 +1,41 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
-import "dotenv/config.js";
+// import "dotenv/config.js";
 
 function BusinessDashboard () {
   const [business, setBusiness] = useState({});
   const [changeInfo, setChangeInfo] = useState({});
   const [chatrequests, setChatRequests] = useState([{}]);
   const [changeInfoMode, setChangeInfoMode] = useState(false);
+  const [posts, setPosts] = useState([{}])
   const [error, setError] = useState(false);
 
   useEffect(() => {
     // fetch business data
-    const serverAddress = process.env.SERVERADDRESS;
+    // const serverAddress = process.env.SERVERADDRESS;
     const data = JSON.parse(localStorage.getItem('ImmivanRole'));
     setBusiness(data);
     setChangeInfo(data);
+    console.log(data)
 
     // fetch chat
-    let chats = [{}];
-    (async () => {
-      chats = await axios.get(`${serverAddress}/chats/:id`)
-      setChatRequests(chats);
-    })();
+    // let chats = [{}];
+    // (async () => {
+    //   chats = await axios.get(`http://localhost:4000/chats/:id`)
+    //   setChatRequests(chats);
+    // })();
     
     // business post
-    let companiesPosts = [{}];
-    (async () => {
-      companiesPosts = await axios.get(`${serverAddress}/posts/:id`)
-      setPosts(companiesPosts);
-    })();
+  //   let companiesPosts = [{}];
+  //   (async () => {
+  //     companiesPosts = await axios.get(`http://localhost:4000/posts/:id`)
+  //     setPosts(companiesPosts);
+  //   })();
   }, []);
 
   // Event Handlers
   const changeBusinessInfoHandler = () => {
+    console.log(business.id)
     setChangeInfoMode(true);
   }
 
@@ -52,9 +55,19 @@ function BusinessDashboard () {
   const submitUpdatedBusinessInfoHandler = async (e) => {
     e.preventDefault();
     // Handle the update business info logic here (e.g., send a request to the server)
-    let updatedInfo = changeInfo
+    let updatedInfo = {};
+    updatedInfo.businessName = changeInfo.businessName;
+    updatedInfo.businessType = changeInfo.businessType;
+    updatedInfo.businessLocation = changeInfo.businessLocation;
+    updatedInfo.information = changeInfo.information;
+    updatedInfo.contactPerson = changeInfo.contactPerson;
+    updatedInfo.telephoneNumber = changeInfo.telephoneNumber;
+    updatedInfo.email = changeInfo.email;
+
     try {
-      let result = await axios.put(`${serverAddress}/business/:id`, {updatedInfo});
+      console.log(business.id)
+      let result = await axios.put(`http://localhost:4000/businessdashboard/${business.id}`, {updatedInfo});
+      console.log(result)
       if (result.data[0].result === "successful") {
         console.log(result.data[0].message)
         setChangeInfoMode(false);
@@ -73,8 +86,8 @@ function BusinessDashboard () {
   const businessInfo = (
     <>
       <ul>
-        <li>Business type: {business.business}</li>
-        <li>Business location: {business.location}</li>
+        <li>Business type: {business.businessType}</li>
+        <li>Business location: {business.businessLocation}</li>
         <li>Information: {business.information}</li>
         <li>Contact Person: {business.contactPerson}</li>
         <li>Contact number: {business.telephoneNumber}</li>
@@ -86,22 +99,22 @@ function BusinessDashboard () {
   const updatingBusinessInfo = (
     <form onSubmit={submitUpdatedBusinessInfoHandler}>
       <div>
-        <label htmlFor="business">Business type:</label>
+        <label htmlFor="businessType">Business type:</label>
         <input
           type="text"
-          id="business"
-          name="business"
-          value={business.business || ""}
+          id="businessType"
+          name="businessType"
+          value={changeInfo.businessType || ""}
           onChange={inputChangeHandler}
         />
       </div>
       <div>
-        <label htmlFor="location">Business location:</label>
+        <label htmlFor="businessLocation">Business location:</label>
         <input
           type="text"
-          id="location"
-          name="location"
-          value={business.location || ""}
+          id="businessLocation"
+          name="businessLocation"
+          value={changeInfo.businessLocation || ""}
           onChange={inputChangeHandler}
         />
       </div>
@@ -110,7 +123,7 @@ function BusinessDashboard () {
         <textarea
           id="information"
           name="information"
-          value={business.information || ""}
+          value={changeInfo.information || ""}
           onChange={inputChangeHandler}
         />
       </div>
@@ -120,7 +133,7 @@ function BusinessDashboard () {
           type="text"
           id="contactPerson"
           name="contactPerson"
-          value={business.contactPerson || ""}
+          value={changeInfo.contactPerson || ""}
           onChange={inputChangeHandler}
         />
       </div>
@@ -130,7 +143,7 @@ function BusinessDashboard () {
           type="tel"
           id="telephoneNumber"
           name="telephoneNumber"
-          value={business.telephoneNumber || ""}
+          value={changeInfo.telephoneNumber || ""}
           onChange={inputChangeHandler}
         />
       </div>
@@ -142,25 +155,25 @@ function BusinessDashboard () {
     </form>
   );
 
-  let clientChats = (
-    chatrequests.map((chat) => (
-          <div key={chat.id}>
-            <p>{chat.client.displayname}</p>
-            <img src={chat.client.profilePic} />
-            <p>{chat.message[chat.message.length()-1]}</p>
-          </div>
-        ))
-  )
+  // let clientChats = (
+  //   chatrequests.map((chat) => (
+  //         <div key={chat.id}>
+  //           <p>{chat.client.displayname}</p>
+  //           <img src={chat.client.profilePic} />
+  //           <p>{chat.message[chat.message.length()-1]}</p>
+  //         </div>
+  //       ))
+  // )
 
   return (
     <>
-      <h1>Hi {business.displayname}</h1>
+      <h1>Hi {business.businessName}</h1>
       <section className="business info">
-        <h3>{business.displayname}</h3>
-        {changeInfoMode? {updatingBusinessInfo}: {businessInfo}}
+        <h3>{business.businessName}</h3>
+        {changeInfoMode? updatingBusinessInfo: businessInfo}
       </section>
       <section className="Chatboxes">
-        {clientChats}
+        {/* {clientChats} */}
         {/* follower name, profile pic */}
       </section>
     </>

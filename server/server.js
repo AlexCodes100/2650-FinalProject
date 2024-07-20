@@ -9,7 +9,6 @@ import session from "express-session";
 import { createClient } from "redis";
 import passport from "passport";
 import authRouter from "./routes/auth.js";
-import { connectDB } from './config/db.js';
 import RedisStore from "connect-redis";
 import registerRouter from "./routes/register.js";
 import loginRouter from "./routes/login.js";
@@ -32,9 +31,6 @@ async function startServer() {
     // Connect to Redis
     await redisClient.connect();
     console.log('Connected to Redis');
-
-    // Connect to MongoDB
-    const db = await connectDB();
 
     // Initialize SQL tables
     await initializeTables();

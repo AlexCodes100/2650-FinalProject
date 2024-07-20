@@ -8,8 +8,8 @@ import indexRouter from "./routes/index.js";
 import session from "express-session";
 import { createClient } from "redis";
 import passport from "passport";
-import authRouter from "./routes/auth.js";
-import { connectDB } from './config/db.js';
+// import authRouter from "./routes/auth.js";
+// import { connectDB } from './config/db.js';
 import RedisStore from "connect-redis";
 import registerRouter from "./routes/register.js";
 import loginRouter from "./routes/login.js";
@@ -17,7 +17,7 @@ import businessDashboardRouter from "./routes/businessDashboard.js"
 import pool, { initializeTables } from './config/sqlDB.js';
 
 // Constants
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 4000;
 
 
 // Redis Client Setup
@@ -35,7 +35,7 @@ async function startServer() {
     console.log('Connected to Redis');
 
     // Connect to MongoDB
-    const db = await connectDB();
+    // const db = await connectDB();
 
     // Initialize SQL tables
     await initializeTables();
@@ -81,7 +81,7 @@ async function startServer() {
 
     // Routes
     app.use("/", indexRouter);
-    app.use("/auth", authRouter);
+    // app.use("/auth", authRouter);
     app.use("/register", registerRouter);
     app.use("/login", loginRouter);
     app.use("/businessdashboard", businessDashboardRouter);

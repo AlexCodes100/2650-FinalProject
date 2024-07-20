@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 
-function BusinessDashboard () {
+function BusinessDashBoard () {
   const [business, setBusiness] = useState({});
   const [chatrequests, setChatRequests] = useState([{}]);
   const [changeInfo, setChangeInfo] = useState(false);
@@ -13,8 +13,10 @@ function BusinessDashboard () {
     const chats = [{}];
     setChatRequests(chats);
     // forEach interestedCompanies, fetch their posts. Sort by date (newest to oldest)
-    const companiesPosts = [{}];
-    setPosts(companiesPosts)
+    
+    //todo ask riley about this line
+    //! const companiesPosts = [{}];
+    //! setPosts(companiesPosts) 
   }, []);
 
   // Event Handlers
@@ -129,4 +131,4 @@ function BusinessDashboard () {
   )
 }
 
-export default BusinessDashboard;
+export default BusinessDashBoard;

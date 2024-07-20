@@ -7,6 +7,7 @@
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
     "axios": "^1.7.2",
+    "bcrypt": "^5.1.1",
     "bootstrap": "^5.3.3",
     "dotenv": "^16.4.5",
     "react": "^18.3.1",
@@ -16,10 +17,11 @@
     "react-router-dom": "^6.24.1",
     "react-scripts": "5.0.1",
     "react-social-icons": "^6.16.0",
+    "util": "^0.12.5",
     "web-vitals": "^2.1.4"
   },
   "scripts": {
-    "start": "react-scripts start",
+    "start": "PORT=4000 react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"

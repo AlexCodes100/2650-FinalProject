@@ -12,7 +12,8 @@ import authRouter from "./routes/auth.js";
 import RedisStore from "connect-redis";
 import registerRouter from "./routes/register.js";
 import loginRouter from "./routes/login.js";
-import pool, { initializeTables } from './config/sqlDB.js';
+import { initializeTables } from './config/sqlDB.js';
+import cors from 'cors';
 
 // Constants
 const port = process.env.PORT || 3000;
@@ -47,6 +48,11 @@ async function startServer() {
     app.use(express.urlencoded({ extended: true }));
     app.use(cookieParser());
     app.use(express.static(path.join("public")));
+
+    // Enable CORS
+    app.use(cors({
+      origin: process.env.CORS_ORIGIN,
+    }));
 
     // Session management (Redis)
     app.use(

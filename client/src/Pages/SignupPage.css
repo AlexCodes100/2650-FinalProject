@@ -1,0 +1,80 @@
+.signup-container {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    background-color: white;
+    color: black;
+  }
+  
+  h1 {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  
+  .form-group {
+    margin-bottom: 15px;
+  }
+  
+  label {
+    display: block;
+    margin-bottom: 5px;
+  }
+  
+  input, select {
+    width: 100%;
+    padding: 8px;
+    box-sizing: border-box;
+    margin-bottom: 10px;
+  }
+  
+  button {
+    width: 100%;
+    padding: 10px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  button:hover {
+    background-color: #45a049;
+  }
+  
+  fieldset {
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 10px;
+    margin-bottom: 15px;
+  }
+  
+  legend {
+    font-weight: bold;
+  }
+  
+  .error-message {
+    color: red;
+    margin-top: -10px;
+    margin-bottom: 10px;
+  }
+  
+  .password-requirements {
+    list-style: none;
+    padding: 0;
+  }
+  
+  .password-requirements li {
+    color: red;
+  }
+  
+  .password-requirements li.valid {
+    color: green;
+  }
+  
+  .password-requirements li.invalid {
+    color: red;
+  }
+  

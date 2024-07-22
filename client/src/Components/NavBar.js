@@ -31,7 +31,7 @@ function NavBar () {
                   <Link to="/logout" className="nav-link btn btn-light mx-2">Log out</Link>
                 ) : (
                   <>
-                    <Link to="/signupSelection" className="nav-link btn btn-light mx-2">Sign Up</Link>
+                    <Link to="/signup" className="nav-link btn btn-light mx-2">Sign Up</Link>
                     <Link to="/loginSelection" className="nav-link btn btn-light mx-2">Log in</Link>
                   </>
                 )}

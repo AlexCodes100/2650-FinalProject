@@ -12,9 +12,6 @@ import BusinessDashboard from './Pages/BusinessDashBoard.js';
 import ErrorPage from "./Pages/ErrorPage";
 import NavBar from './Components/NavBar.js';
 import Footer from './Components/Footer.js';
-import Dashboard from "./Pages/Dashboard.js";
-import ClientDashboard from "./Pages/ClientDashBoard.js";
-import BusinessDashboard from "./Pages/BusinessDashBoard.js";
 
 
 

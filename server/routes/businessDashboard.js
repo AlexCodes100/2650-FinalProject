@@ -1,5 +1,4 @@
 import express from 'express';
-import mysql from "mysql2/promise";
 import pool from '../config/sqlDB.js';
 import "dotenv/config.js";
 
@@ -10,18 +9,6 @@ const router = express.Router();
 // fetch business data
 async function businessLogin () {
   try {
-    // const connection = await mysql.createConnection({
-    //   host: process.env.SQL_HOST,
-    //   user: process.env.SQL_USER,
-    //   password: process.env.SQL_PASSWORD,
-    //   database: process.env.SQL_DATABASE, // business?
-    //   waitForConnections: true,
-    //   connectionLimit: 10,
-    //   queueLimit: 0
-    // });
-    // const [rows, fields] = await connection.execute(`SELECT id, name, business, location, information, contactPerson, telephoneNumber, email FROM business WHERE id = ?`, [userId]);
-    // await connection.end();
-    // return rows;
     const connection = await pool.getConnection();
     try {
       const [rows, fields] = await connection.execute(`SELECT * FROM business`);
@@ -66,7 +53,6 @@ router.post('/', async (req,res) => {
 })
 
 // update business data
-
 async function updateUserById(userId, updateFields) {
   const fields = [];
   const values = [];
@@ -86,10 +72,6 @@ async function updateUserById(userId, updateFields) {
     WHERE id = ?
   `;
 
-  console.log('Query:', query);
-  console.log('Values:', values);
-  // const connection = await pool.getConnection();
-
   return new Promise((resolve, reject) => {
     console.log('Before pool.query');
     pool.query(query, values)
@@ -107,37 +89,6 @@ async function updateUserById(userId, updateFields) {
       });
     console.log('After pool.query');
   });
-  // return new Promise((resolve, reject) => {
-  //   const fields = [];
-  //   const values = [];
-  //   for (const [key, value] of Object.entries(updateFields)) {
-  //     if (key !== 'email' && key !== 'password') {
-  //       fields.push(`${key} = ?`);
-  //       values.push(value);
-  //     }
-  //   }
-  //   values.push(userId);
-  //   const query = `
-  //     UPDATE business
-  //     SET ${fields.join(', ')}
-  //     WHERE id = ?
-  //   `;
-  //   console.log('Query:', query);
-  //   console.log('Values:', values);
-
-  //   pool.query(query, values, (error, results) => {
-  //     if (error) {
-  //       console.error('Database error:', error);
-  //       return reject(error);
-  //     }
-  //     console.log('Query results:', results);
-  //     resolve({
-  //       result: "successful",
-  //       message: 'User updated successfully',
-  //       affectedRows: results.affectedRows
-  //     });
-  //   });
-  // });
 }
 
 router.put('/:id', async (req,res) => {
@@ -147,9 +98,6 @@ router.put('/:id', async (req,res) => {
   console.log('Update fields:', updateFields);
 
   try {
-    // const results = await updateUserById(userId, updateFields);
-    // console.log('Update result:', results);
-    // res.status(200).send([results]);
     const mysqlResults = await updateUserById(userId, updateFields);
     console.log('MySQL results:', mysqlResults);
 

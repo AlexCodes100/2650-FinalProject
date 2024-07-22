@@ -8,13 +8,13 @@ import indexRouter from "./routes/index.js";
 import session from "express-session";
 import { createClient } from "redis";
 import passport from "passport";
-import authRouter from "./routes/auth.js";
+// import authRouter from "./routes/auth.js";
 import RedisStore from "connect-redis";
 import registerRouter from "./routes/register.js";
 import loginRouter from "./routes/login.js";
 import businessDashboardRouter from "./routes/businessDashboard.js"
 import  { initializeTables } from './config/sqlDB.js';
-
+import postRouter from "./routes/posts.js"
 import cors from "cors";
 
 
@@ -53,9 +53,10 @@ async function startServer() {
     app.use(express.static(path.join("public")));
 
     // Enable CORS
-    app.use(cors({
-      origin: process.env.CORS_ORIGIN,
-    }));
+    // app.use(cors({
+    //   origin: process.env.CORS_ORIGIN,
+    // }));
+    app.use(cors());
 
     // Session management (Redis)
     app.use(
@@ -89,6 +90,7 @@ async function startServer() {
     app.use("/register", registerRouter);
     app.use("/login", loginRouter);
     app.use("/businessdashboard", businessDashboardRouter);
+    app.use("/posts", postRouter);
 
 
     // Route to print sessions for debugging

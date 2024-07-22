@@ -26,7 +26,7 @@ async function initializeTables() {
     );
   `;
   const createBusinessTableQuery = `
-    CREATE TABLE IF NOT EXISTS business (
+  CREATE TABLE IF NOT EXISTS business (
     id INT AUTO_INCREMENT PRIMARY KEY,
     loginEmail VARCHAR(100) UNIQUE NOT NULL,
     loginPassword VARCHAR(100) NOT NULL,
@@ -38,7 +38,36 @@ async function initializeTables() {
     telephoneNumber VARCHAR(20),
     email VARCHAR(100) UNIQUE
 );
-  `
+  `;
+
+  const createBusinessPostsTableQuery = `
+  CREATE TABLE IF NOT EXISTS businessPosts (
+    postId INT AUTO_INCREMENT PRIMARY KEY,
+    businessId INT,
+    content TEXT,
+    likesCount INT DEFAULT 0,
+    FOREIGN KEY (businessId) REFERENCES business(id)
+);`;
+
+  const createPostCommentsTableQuery = `
+  CREATE TABLE IF NOT EXISTS comments (
+    commentId INT AUTO_INCREMENT PRIMARY KEY,
+    postId INT,
+    content TEXT,
+    id INT
+    FOREIGN KEY (postId) REFERENCES businessPosts(postId),
+    FOREIGN KEY (id) REFERENCES users(id)
+  );`;
+
+  const createLikesTableQuery = `
+  CREATE TABLE IF NOT EXISTS likes (
+    likeId INT AUTO_INCREMENT PRIMARY KEY,
+    postId INT,
+    id INT,
+    FOREIGN KEY (postId) REFERENCES businessPosts(postId),
+    FOREIGN KEY (id) REFERENCES users(id)
+  );`
+  
 
   const connection = await pool.getConnection();
   try {

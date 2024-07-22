@@ -7,7 +7,12 @@ function BusinessDashBoard () {
   const [changeInfo, setChangeInfo] = useState({});
   const [chatrequests, setChatRequests] = useState([{}]);
   const [changeInfoMode, setChangeInfoMode] = useState(false);
-  const [posts, setPosts] = useState([{}])
+  const [posts, setPosts] = useState([{}]);
+  const [creatingNewPost, setCreatingNewPost] = useState(false);
+  const [newPostContent, setNewPostContent] = useState('');
+  const [updatePost, setUpdatePost] = useState(false);
+  const [updatePostId, setUpdatePostId] = useState(-1);
+  const [updateingPostContent, setUpdatingPostContent] = useState("");
   const [error, setError] = useState(false);
 
   useEffect(() => {
@@ -16,7 +21,6 @@ function BusinessDashBoard () {
     const data = JSON.parse(localStorage.getItem('ImmivanRole'));
     setBusiness(data);
     setChangeInfo(data);
-    console.log(data)
 
     // fetch chat
     // let chats = [{}];
@@ -26,14 +30,19 @@ function BusinessDashBoard () {
     // })();
     
     // business post
-  //   let companiesPosts = [{}];
-  //   (async () => {
-  //     companiesPosts = await axios.get(`http://localhost:4000/posts/:id`)
-  //     setPosts(companiesPosts);
-  //   })();
+    let companiesPosts = [{}];
+    (async () => {
+      try {
+        companiesPosts = await axios.get(`http://localhost:4000/posts/${data.id}`);
+        setPosts(companiesPosts.data);
+      } catch (err) {
+        setError('An error occurred while fetching posts');
+        console.error('Error fetching posts:', err);
+      }
+    })();
   }, []);
 
-  // Event Handlers
+  // Business Profile Event Handlers
   const changeBusinessInfoHandler = () => {
     console.log(business.id)
     setChangeInfoMode(true);
@@ -82,6 +91,81 @@ function BusinessDashBoard () {
     
   };
 
+  // Post Event Handlers
+  const creatingNewPostHandler = () => {
+    setCreatingNewPost(true);
+  }
+  const cancelCreatingNewPostHandler = () => {
+    setCreatingNewPost(false);
+  }
+    const handleCreatePost = async (e) => {
+    e.preventDefault();
+    if (!newPostContent.trim()) return;
+
+    try {
+      const response = await axios.post('http://localhost:4000/posts/', {
+        businessId: business.id,
+        content: newPostContent
+      });
+      setNewPostContent('');
+      setCreatingNewPost(false);
+      // window.location.reload()
+    } catch (error) {
+      console.error('Error creating post:', error);
+      // Handle error (e.g., show error message to user)
+    }
+  };
+  const changingPostContent = (e) => {
+    setUpdatingPostContent(e.target.value)
+    console.log(updateingPostContent)
+  };
+
+  const updatingPost = (e) => {
+    // console.log(business.id)
+    setUpdatePost(true);
+    let targetPost = posts.find((post) => {
+      if (post.postId == e.target.id)
+      return post.content;
+    });
+    setUpdatingPostContent(targetPost.content)
+    setUpdatePostId(e.target.id);
+  }
+
+  const cancelUpdatingPost = () => {
+    setUpdatePost(false);
+    setUpdatingPostContent("")
+    setUpdatePostId(-1);
+  }
+
+  const submitUpdatedPost = async (e) => {
+    try {
+      await axios.put(`http://localhost:4000/posts/${e.target.id}`, { 
+        businessId: business.id,
+        content: updateingPostContent })
+      .then((res) => 
+        console.log(res.data.result)
+      )
+      window.location.reload();
+    } catch (error) {
+      console.error('Error updating post:', error);
+    }
+  }
+
+  const deletePost = async (e) => {
+    console.log(business.id)
+    if (window.confirm('Are you sure you want to delete this post?')) {
+      try {
+        await axios.delete(`http://localhost:4000/posts/${e.target.id}`, {
+          data:{businessId: business.id}
+        });
+        window.location.reload();
+      } catch (error) {
+        console.error('Error deleting post:', error);
+        // Handle error (e.g., show error message to user)
+      }
+    }
+  };
+
   // Contents
   const businessInfo = (
     <>
@@ -95,7 +179,18 @@ function BusinessDashBoard () {
       <button onClick={changeBusinessInfoHandler}>Update Information</button>
     </>
   );
-
+  const createPostForm = (
+    <form onSubmit={handleCreatePost}>
+        <textarea
+          value={newPostContent}
+          onChange={(e) => setNewPostContent(e.target.value)}
+          placeholder="Write a new post..."
+          required
+        />
+        <button type="submit">Create Post</button>
+        <button type="button" onClick={cancelCreatingNewPostHandler}>Cancel</button>
+      </form>
+  )
   const updatingBusinessInfo = (
     <form onSubmit={submitUpdatedBusinessInfoHandler}>
       <div>
@@ -155,6 +250,28 @@ function BusinessDashBoard () {
     </form>
   );
 
+  const companiesPosts = posts.map((post) => {
+    updatePost && updatePostId == post.postId?
+    post = 
+    <div key={`post-${post.postId}`} style={{backgroundColor: "#fff"}}>
+      <textarea
+        value={updateingPostContent}
+        onChange={changingPostContent}
+      />
+      <div>{post.likesCount > 1? `${post.likesCount}Likes`:`${post.likesCount}Like`}</div>
+      <button id={post.postId} onClick={submitUpdatedPost}>Update</button>
+      <button onClick={cancelUpdatingPost}>Cancel</button>
+    </div> : 
+    post = 
+    <div key={`post-${post.postId}`}  style={{backgroundColor: "#fff"}}>
+      <p>{post.content}</p>
+      <div>{post.likesCount > 1? `${post.likesCount}Likes`:`${post.likesCount}Like`}</div>
+      <button id={post.postId} onClick={updatingPost}>Update</button>
+      <button id={post.postId} onClick={deletePost}>Delete</button>
+    </div>
+    return post;
+  })
+
   // let clientChats = (
   //   chatrequests.map((chat) => (
   //         <div key={chat.id}>
@@ -175,6 +292,14 @@ function BusinessDashBoard () {
       <section className="Chatboxes">
         {/* {clientChats} */}
         {/* follower name, profile pic */}
+      </section>
+      <section>
+        <>
+        <h3 key={"Post header"}>Your Posts</h3>
+        <button onClick={creatingNewPostHandler}>Create a New Post</button>
+        {creatingNewPost? createPostForm:<></>}
+        {posts? companiesPosts:<></>}
+        </>
       </section>
     </>
   )

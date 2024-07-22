@@ -31,19 +31,47 @@ async function initializeTables(pool) {
 
   const createBusinessTableQuery = `
     CREATE TABLE IF NOT EXISTS business (
-      id INT AUTO_INCREMENT PRIMARY KEY,
-      loginEmail VARCHAR(100) UNIQUE NOT NULL,
-      loginPassword VARCHAR(100) NOT NULL,
-      businessName VARCHAR(100) NOT NULL,
-      businessType VARCHAR(50),
-      businessLocation VARCHAR(100),
-      information TEXT,
-      contactPerson VARCHAR(100),
-      telephoneNumber VARCHAR(20),
-      email VARCHAR(100) UNIQUE NOT NULL,
-      role ENUM('user', 'business', 'admin') DEFAULT 'business' NOT NULL
-    );
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    loginEmail VARCHAR(100) UNIQUE NOT NULL,
+    loginPassword VARCHAR(100) NOT NULL,
+    businessName VARCHAR(100) NOT NULL,
+    businessType VARCHAR(50),
+    businessLocation VARCHAR(100),
+    information TEXT,
+    contactPerson VARCHAR(100),
+    telephoneNumber VARCHAR(20),
+    email VARCHAR(100) UNIQUE,
+    role ENUM('user', 'business', 'admin') DEFAULT 'business' NOT NULL
+);
   `;
+
+  const createBusinessPostsTableQuery = `
+  CREATE TABLE IF NOT EXISTS businessPosts (
+    postId INT AUTO_INCREMENT PRIMARY KEY,
+    businessId INT,
+    content TEXT,
+    likesCount INT DEFAULT 0,
+    FOREIGN KEY (businessId) REFERENCES business(id)
+);`;
+
+  const createPostCommentsTableQuery = `
+  CREATE TABLE IF NOT EXISTS comments (
+    commentId INT AUTO_INCREMENT PRIMARY KEY,
+    postId INT,
+    content TEXT,
+    id INT
+    FOREIGN KEY (postId) REFERENCES businessPosts(postId),
+    FOREIGN KEY (id) REFERENCES users(id)
+  );`;
+
+  const createLikesTableQuery = `
+  CREATE TABLE IF NOT EXISTS likes (
+    likeId INT AUTO_INCREMENT PRIMARY KEY,
+    postId INT,
+    id INT,
+    FOREIGN KEY (postId) REFERENCES businessPosts(postId),
+    FOREIGN KEY (id) REFERENCES users(id)
+  );`
 
   const connection = await pool.getConnection();
   try {

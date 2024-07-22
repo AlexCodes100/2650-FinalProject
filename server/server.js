@@ -8,12 +8,10 @@ import indexRouter from "./routes/index.js";
 import session from "express-session";
 import { createClient } from "redis";
 import passport from "passport";
-// import authRouter from "./routes/auth.js";
 import RedisStore from "connect-redis";
 import registerRouter from "./routes/register.js";
 import loginRouter from "./routes/login.js";
 import businessDashboardRouter from "./routes/businessDashboard.js"
-import  { initializeTables } from './config/sqlDB.js';
 import postRouter from "./routes/posts.js"
 import cors from "cors";
 
@@ -36,11 +34,17 @@ async function startServer() {
     await redisClient.connect();
     console.log('Connected to Redis');
 
-    // Initialize SQL tables
-    await initializeTables();
+
+
     
     // Create http server
     const app = express();
+
+    // Initialize SQL tables
+    // const pool = await initializeDatabase();
+    // console.log('Connected to SQL');
+
+    // app.locals.pool = pool;
 
     // view engine setup
     app.set("views", path.join("views"));
@@ -120,7 +124,7 @@ async function startServer() {
     });
 
   } catch (err) {
-    console.error('Failed to connect to MongoDB', err);
+    console.error('Failed to connect to db', err);
     process.exit(1);
   }
 }

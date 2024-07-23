@@ -61,7 +61,7 @@ async function initializeTables(pool) {
     commentId INT AUTO_INCREMENT PRIMARY KEY,
     postId INT,
     content TEXT,
-    id INT
+    id INT,
     FOREIGN KEY (postId) REFERENCES businessPosts(postId),
     FOREIGN KEY (id) REFERENCES users(id)
   );`;

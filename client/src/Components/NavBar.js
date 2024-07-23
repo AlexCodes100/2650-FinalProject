@@ -26,6 +26,7 @@ function NavBar () {
         
             <div className="collapse navbar-collapse justify-content-end">
               <div className="navbar-nav">
+              <Link to="/" className="nav-link btn btn-light mx-2">home</Link>
                 <Link to="/about" className="nav-link btn btn-light mx-2">About</Link>
                 {LoggedIn ? (
                   <Link to="/logout" className="nav-link btn btn-light mx-2">Log out</Link>

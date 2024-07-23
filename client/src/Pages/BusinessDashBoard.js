@@ -33,7 +33,7 @@ function BusinessDashBoard () {
     let companiesPosts = [{}];
     (async () => {
       try {
-        companiesPosts = await axios.get(`http://localhost:4000/posts/${data.id}`);
+        companiesPosts = await axios.get(`http://localhost:3000/posts/${data.id}`);
         setPosts(companiesPosts.data);
       } catch (err) {
         setError('An error occurred while fetching posts');

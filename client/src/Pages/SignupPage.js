@@ -4,6 +4,7 @@ import axios from "axios";
 import './SignupPage.css';
 import { useState } from "react";
 import { useNavigate } from 'react-router-dom';
+import NavBar from "../Components/NavBar";
 
 function SignupPage() {
   const navigate = useNavigate();
@@ -51,7 +52,9 @@ function SignupPage() {
   });
 
   return (
-    <div className="signup-container">
+    <>
+      <NavBar />
+      <div className="signup-container">
       <h1>Client Signup</h1>
       <form onSubmit={formik.handleSubmit}>
         <div className="form-group">
@@ -206,6 +209,9 @@ function SignupPage() {
         <button type="submit">Submit</button>
       </form>
     </div>
+
+    </>
+    
   );
 }
 

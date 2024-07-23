@@ -39,7 +39,7 @@ function LoginPage () {
   const businessLoginHandler = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post("http://localhost:4000/businessdashboard", {
+      const response = await axios.post("http://localhost:3000/businessdashboard", {
         email: userName,
         password: password
       })

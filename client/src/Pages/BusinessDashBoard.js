@@ -3,7 +3,16 @@ import axios from "axios";
 // import "dotenv/config.js";
 
 function BusinessDashBoard () {
-  const [business, setBusiness] = useState({});
+  const [business, setBusiness] = useState({
+    id: '1',
+    businessName: 'canada Immigration',
+    businessType: 'immigration',
+    businessLocation: 'Vancouver',
+    information: 'we help with student visa and PR',
+    contactPerson: 'Mr Jean',
+    telephoneNumber: '234-443-4543',
+    email: 'Immigration@gmail'
+  });
   const [changeInfo, setChangeInfo] = useState({});
   const [chatrequests, setChatRequests] = useState([{}]);
   const [changeInfoMode, setChangeInfoMode] = useState(false);
@@ -14,6 +23,8 @@ function BusinessDashBoard () {
   const [updatePostId, setUpdatePostId] = useState(-1);
   const [updateingPostContent, setUpdatingPostContent] = useState("");
   const [error, setError] = useState(false);
+
+  
 
   useEffect(() => {
     // fetch business data

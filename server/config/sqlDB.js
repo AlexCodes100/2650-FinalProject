@@ -48,9 +48,11 @@ async function initializeTables(pool) {
   const createBusinessPostsTableQuery = `
   CREATE TABLE IF NOT EXISTS businessPosts (
     postId INT AUTO_INCREMENT PRIMARY KEY,
-    businessId INT,
+    businessId INT NOT NULL,
+    title VarChar(200),
     content TEXT,
     likesCount INT DEFAULT 0,
+    createDate DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (businessId) REFERENCES business(id)
 );`;
 
@@ -77,6 +79,9 @@ async function initializeTables(pool) {
   try {
     await connection.query(createUserTableQuery);
     await connection.query(createBusinessTableQuery);
+    await connection.query(createBusinessPostsTableQuery);
+    await connection.query(createPostCommentsTableQuery);
+    await connection.query(createLikesTableQuery);
     console.log('SQL tables initialized');
   } finally {
     connection.release();

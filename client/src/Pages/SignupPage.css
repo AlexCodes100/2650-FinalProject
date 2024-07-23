@@ -5,8 +5,8 @@
     border: 1px solid #ccc;
     border-radius: 5px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    background-color: white;
-    color: black;
+    /* background-color: white; */
+    color: white;
   }
   
   h1 {
@@ -48,7 +48,7 @@
     border: 1px solid #ccc;
     border-radius: 5px;
     padding: 10px;
-    margin-bottom: 15px;
+    /* margin-bottom: 15px; */
   }
   
   legend {

@@ -1,6 +1,4 @@
 import React, { useContext, useEffect, useState } from "react";
-// import UserContext from "./UserContext";
-import UserProfile from "./UserProfile";
 import RecommendedCompanies from "./RecommendedCompanies";
 import FollowedCompanies from "./FollowedCompanies";
 import Posts from "./Posts";

@@ -10,14 +10,16 @@ import { createClient } from "redis";
 import passport from "passport";
 import RedisStore from "connect-redis";
 import registerRouter from "./routes/register.js";
-import loginRouter from "./routes/login.js";
+// import loginRouter from "./routes/login.js";
 import businessDashboardRouter from "./routes/businessDashboard.js"
+import clientDashboardRouter from "./routes/clientDashboard.js"
 import postRouter from "./routes/posts.js"
 import cors from "cors";
+import authRouter from "./routes/auth.js";
 
 
 // Constants
-const port = process.env.PORT || 4000;
+const port = process.env.PORT || 3000;
 
 
 // Redis Client Setup
@@ -57,10 +59,10 @@ async function startServer() {
     app.use(express.static(path.join("public")));
 
     // Enable CORS
-    // app.use(cors({
-    //   origin: process.env.CORS_ORIGIN,
-    // }));
-    app.use(cors());
+    app.use(cors({
+      origin: process.env.CORS_ORIGIN,
+    }));
+    // app.use(cors());
 
     // Session management (Redis)
     app.use(
@@ -90,10 +92,11 @@ async function startServer() {
 
     // Routes
     app.use("/", indexRouter);
-    // app.use("/auth", authRouter);
+    app.use("/auth", authRouter);
     app.use("/register", registerRouter);
-    app.use("/login", loginRouter);
+    // app.use("/login", loginRouter);
     app.use("/businessdashboard", businessDashboardRouter);
+    app.use("/clientdashboard", clientDashboardRouter);
     app.use("/posts", postRouter);
 
 

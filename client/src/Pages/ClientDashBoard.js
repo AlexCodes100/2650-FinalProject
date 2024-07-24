@@ -3,16 +3,31 @@ import RecommendedCompanies from "./RecommendedCompanies";
 import FollowedCompanies from "./FollowedCompanies";
 import Posts from "./Posts";
 import axios from "axios";
-import { Container, Row, Col, Card, Button } from 'react-bootstrap';
+import { Container, Row, Col, Card, Button, Modal } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import UserProfile from "./UserProfile";
 
 function ClientDashboard() {
+  const [showModal, setShowModal] = useState(false);
   const [user, setUser] = useState({
-    id: 1,
-    firstName: "Xavier",
-    lastName: "P",
-    followedCompanies: [1, 4, 6],
+    id: '1',
+    firstName: 'xavier',
+    lastName: 'P',
+    email: 'x.p@gmail.com',
+    orgainzation: 'Company XYZ',
+    familySize: 3,
+    preferredLanguage: 'French',
+    role: 'student',
+    followedCompanies: [
+      { id: 1, name: "TechCorp" },
+      { id: 2, name: "FashionHub" },
+      { id: 3, name: "GlobalSolutions" }
+    ]
+   
   });
+  const handleOpenModal = () => setShowModal(true);
+  const handleCloseModal = () => setShowModal(false);
+
   const followedCompanies = user.followedCompanies;
   // const { user, followedCompanies } = useContext(UserContext);
   const [posts, setPosts] = useState([]);
@@ -122,6 +137,27 @@ function ClientDashboard() {
   };
   return (
     <Container className="client-dashboard mt-4">
+       <div>
+      {/* Add this button to open the modal */}
+      <Button variant="primary" onClick={handleOpenModal}>
+        Update Profile
+      </Button>
+
+      {/* Modal for updating user profile */}
+      <Modal show={showModal} onHide={handleCloseModal}>
+        <Modal.Header closeButton>
+          <Modal.Title>Update Profile</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <UserProfile user={user} />
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={handleCloseModal}>
+            Close
+          </Button>
+        </Modal.Footer>
+      </Modal>
+    </div>
 
 <Card style={{ fontWeight: 'bold',backgroundColor: 'rgba(255, 228, 225, 0.5)', border: 'none', padding: '20px' }}>
         {/* <Card style={{ fontWeight: 'bold',backgroundColor: '#FFE4C4', border: 'none', padding: '20px' }}> */}
@@ -137,7 +173,11 @@ function ClientDashboard() {
         <Card className="mb-4 mt-5">
           <Card.Body>
             <Card.Title>Followed Companies</Card.Title>
-            <FollowedCompanies companies={followedCompanies} onUnfollow={handleUnfollow}/>
+            <FollowedCompanies 
+            companies={followedCompanies} 
+            onUnfollow={handleUnfollow}
+            onFollow={handleFollow}
+            />
           </Card.Body>
         </Card>
         <Card>

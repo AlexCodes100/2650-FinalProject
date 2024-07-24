@@ -36,42 +36,58 @@ passport.use(new GoogleStrategy({
 
 // Configure the local strategy for use by Passport.
 passport.use(new LocalStrategy(
-    { usernameField: 'email', passwordField: 'password' },
-    async (email, password, done) => {
-      try {
-        const [rows] = await pool.query(`SELECT * FROM users WHERE email = ?`, [email]);
-  
-        if (rows.length === 0) {
-          return done(null, false, { message: 'Invalid email or password' });
-        }
-  
-        const user = rows[0];
+  { usernameField: 'email', passwordField: 'password' },
+  async (email, password, done) => {
+    try {
+      // Check user database
+      const [userRows] = await pool.query(`SELECT * FROM users WHERE email = ?`, [email]);
+      if (userRows.length > 0) {
+        const user = userRows[0];
+        console.log('User found:', user); // Debug log
+        console.log('Comparing password:', password, 'with hash:', user.password); // Debug log
         const match = await bcrypt.compare(password, user.password);
-  
-        if (!match) {
-          return done(null, false, { message: 'Invalid email or password' });
+        if (match) {
+          console.log('Authenticated user:', user); // Debug log
+          return done(null, { ...user, role: 'client' });
         }
-  
-        return done(null, user);
-      } catch (err) {
-        return done(err);
       }
+
+      // Check business database
+      const [businessRows] = await pool.query(`SELECT * FROM business WHERE loginEmail = ?`, [email]);
+      if (businessRows.length > 0) {
+        const business = businessRows[0];
+        console.log('Business found:', business); // Debug log
+        console.log('Comparing password:', password, 'with hash:', business.loginPassword); // Debug log
+        const match = await bcrypt.compare(password, business.loginPassword);
+        if (match) {
+          console.log('Authenticated business:', business); // Debug log
+          return done(null, { ...business, role: 'business' });
+        }
+      }
+
+      return done(null, false, { message: 'Invalid email or password' });
+    } catch (err) {
+      console.error('Error during local authentication:', err);
+      return done(err);
     }
-  ));
+  }
+));
 
 passport.serializeUser((user, cb) => {
   console.log('Serializing user:', user); // Debug log
-  cb(null, user.id); // Ensure the ID is correctly passed
+  cb(null, { id: user.id, role: user.role });
 });
 
 // Deserialize user instance from session
-passport.deserializeUser(async (id, cb) => {
-  console.log('Deserializing user ID:', id); // Debug log
+passport.deserializeUser(async (obj, cb) => {
   try {
-    const [rows] = await pool.query(`SELECT * FROM users WHERE id = ?`, [id]);
-    const user = rows[0];
-    console.log('Found user in SQL DB:', user); // Debug log
-    cb(null, user);
+    if (obj.role === 'client') {
+      const [rows] = await pool.query(`SELECT * FROM users WHERE id = ?`, [obj.id]);
+      cb(null, rows[0]);
+    } else if (obj.role === 'business') {
+      const [rows] = await pool.query(`SELECT * FROM business WHERE id = ?`, [obj.id]);
+      cb(null, rows[0]);
+    }
   } catch (err) {
     cb(err);
   }
@@ -87,10 +103,13 @@ router.get('/oauth2/redirect/google', passport.authenticate('google', {
 }));
 
 // Route to handle local login
-router.post('/login', passport.authenticate('local', {
-    successReturnToOrRedirect: '/',
-    failureRedirect: '/login'
-  }));
+router.post('/login', passport.authenticate('local'), (req, res) => {
+  if (req.user.role === 'client') {
+    res.json({ user: req.user, role: 'client' });
+  } else if (req.user.role === 'business') {
+    res.json({ user: req.user, role: 'business' });
+  }
+});
 
 router.post('/logout', (req, res, next) => {
   req.logout((err) => {

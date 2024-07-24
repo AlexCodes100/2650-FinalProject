@@ -243,15 +243,15 @@ function BusinessDashBoard () {
 
   
 
-  // let clientChats = (
-  //   chatrequests.map((chat) => (
-  //         <div key={chat.id}>
-  //           <p>{chat.client.displayname}</p>
-  //           <img src={chat.client.profilePic} />
-  //           <p>{chat.message[chat.message.length()-1]}</p>
-  //         </div>
-  //       ))
-  // )
+// let clientChats = (
+//   chatrequests.map((chat) => (
+//         <div key={chat.id}>
+//           <p>{chat.client.displayname}</p>
+//           <img src={chat.client.profilePic} />
+//           <p>{chat.message[chat.message.length()-1]}</p>
+//         </div>
+//       ))
+// )
 
   return (
     <Container className="business-dashboard mt-4">

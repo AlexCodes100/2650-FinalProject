@@ -1,24 +1,32 @@
 import React from 'react';
-import { Card, Button } from 'react-bootstrap';
+import { Card, ListGroup, Button } from 'react-bootstrap';
 
-
-function FollowedCompanies({ companies, onUnfollow }) {
+function FollowedCompanies({ companies, onUnfollow, onFollow }) {
   return (
-    <div className="followed-companies">
-    {companies.length === 0 ? (
-      <p>No followed companies yet.</p>
-    ) : (
-      companies.map((companyId) => (
-        <Card key={companyId} className="mb-3">
-          <Card.Body>
-            <Card.Title>Company ID: {companyId}</Card.Title>
-            <Button variant="danger" onClick={() => onUnfollow(companyId)}>Unfollow</Button>
-          </Card.Body>
-        </Card>
-      ))
-    )}
-  </div>
-);
+    <Card>
+      <ListGroup variant="flush">
+        {companies.map((company) => (
+          <ListGroup.Item key={company.id}>
+            {company.name}
+            <Button 
+              variant="danger" 
+              onClick={() => onUnfollow(company.id)} 
+              style={{ float: 'right' }}
+            >
+              Unfollow
+            </Button>
+            <Button 
+              variant="primary" 
+              onClick={() => onFollow(company.id)} 
+              style={{ float: 'right' }}
+            >
+              Follow
+            </Button>
+          </ListGroup.Item>
+        ))}
+      </ListGroup>
+    </Card>
+  );
 }
 
 export default FollowedCompanies;

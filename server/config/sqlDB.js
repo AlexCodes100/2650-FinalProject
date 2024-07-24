@@ -61,7 +61,7 @@ async function initializeTables(pool) {
     commentId INT AUTO_INCREMENT PRIMARY KEY,
     postId INT,
     content TEXT,
-    id INT
+    id INT,
     FOREIGN KEY (postId) REFERENCES businessPosts(postId),
     FOREIGN KEY (id) REFERENCES users(id)
   );`;
@@ -130,7 +130,7 @@ async function createTestAccounts(pool) {
     for (const account of testAccounts) {
       const { table } = account;
 
-      const [rows] = await connection.query(`SELECT COUNT(*) as count FROM ${table} WHERE email = ?`, [account.email]);
+      const [rows] = await connection.query(`SELECT COUNT(*) as count FROM ${table} WHERE ${table === 'business' ? 'loginEmail' : 'email'} = ?`, [account.email]);
       if (rows[0].count === 0) {
         if (table === 'users') {
           const { firstName, lastName, email, password, role } = account;

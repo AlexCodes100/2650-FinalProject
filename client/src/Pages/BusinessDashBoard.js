@@ -81,15 +81,15 @@ function BusinessDashBoard () {
     
     // business post
     let companiesPosts = [{}];
-    (async () => {
-      try {
-        companiesPosts = await axios.get(`http://localhost:3000/posts/${data.id}`);
-        setPosts(companiesPosts.data);
-      } catch (err) {
-        setError('An error occurred while fetching posts');
-        console.error('Error fetching posts:', err);
-      }
-    })();
+    // (async () => {
+    //   try {
+    //     companiesPosts = await axios.get(`http://localhost:3000/posts/${data.id}`);
+    //     setPosts(companiesPosts.data);
+    //   } catch (err) {
+    //     setError('An error occurred while fetching posts');
+    //     console.error('Error fetching posts:', err);
+    //   }
+    // })();
   }, []);
 
  // Business Profile Event Handlers

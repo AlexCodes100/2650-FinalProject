@@ -2,10 +2,12 @@ import React, { useState } from 'react';
 import './LoginSelectionPage.css';
 import Navbar from '../Components/NavBar.js'
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 const LoginSelectionPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const navigate = useNavigate();
 
   const handleEmailChange = (e) => {
     setEmail(e.target.value);
@@ -18,14 +20,20 @@ const LoginSelectionPage = () => {
   const handleLogin = (e) => {
     e.preventDefault();
     // Send the email and plain password to the server
-    axios.post('http://localhost:3000/login', { email, password })
+    axios.post('http://localhost:3000/auth/login', { email, password })
       .then(response => {
         console.log(response.data);
-        // Handle successful login. Redirect to client or business dashboard.
+        if (response.data.role === 'client') {
+          localStorage.setItem('ImmivanRole', JSON.stringify({ ...response.data.user, role: 'client' }));
+          navigate("/clientDashboard");
+        } else if (response.data.role === 'business') {
+          localStorage.setItem('ImmivanRole', JSON.stringify({ ...response.data.user, role: 'business' }));
+          navigate("/businessDashboard");
+        }
       })
       .catch(error => {
         console.error(error);
-        // Handle login error (e.g., display error message to the user)
+        navigate("/errorPage");
       });
   };
 

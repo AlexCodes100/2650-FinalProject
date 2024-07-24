@@ -1,56 +1,50 @@
 import express from 'express';
 import pool from '../config/sqlDB.js';
 import "dotenv/config.js";
+import bcrypt from 'bcrypt';
 
 const router = express.Router();
 
 
 
 // fetch business data
-async function businessLogin () {
-  try {
-    const connection = await pool.getConnection();
-    try {
-      const [rows, fields] = await connection.execute(`SELECT * FROM business`);
-      return rows;
-    } catch (err) {
-      console.log(`Error: connecting to mysql ${err}`)
-    } finally {
-      connection.release();
-    }
-  } catch (err) {
-    console.log(`Error: connecting to mysql ${err}`)
+async function businessLogin(email, password) {
+  const [rows] = await pool.query(`SELECT * FROM business WHERE loginEmail = ?`, [email]);
+  if (rows.length === 0) {
+    return null;
   }
+  const business = rows[0];
+  const match = await bcrypt.compare(password, business.password);
+  if (!match) {
+    return null;
+  }
+  return business;
 }
 
 //Business database:
   // id, loginEmail, password, name, businessType (business), businessLocation (location), inofrmation, contactPerson, telephoneNumber, email
-router.post('/', async (req,res) => {
-  console.log(req.body)
-  let businesses = [];
-  businesses = await businessLogin();
-  
-  let matchedBusiness = businesses.find((business) => business.loginEmail === req.body.email);
-  console.log(matchedBusiness)
-  console.log(matchedBusiness.loginPassword)
-  console.log(req.body.password)
-  if (matchedBusiness.loginPassword === req.body.password) {
+
+router.post('/', async (req, res) => {
+  const { email, password } = req.body;
+  const business = await businessLogin(email, password);
+  if (business) {
     const result = {
       role: "business",
-      id: matchedBusiness.id,
-      businessName: matchedBusiness.businessName,
-      businessType: matchedBusiness.businessType,
-      businessLocation: matchedBusiness.businessLocation,
-      information: matchedBusiness.information,
-      contactPerson: matchedBusiness.contactPerson,
-      telephoneNumber: matchedBusiness.telephoneNumber,
-      email: matchedBusiness.email,
+      id: business.id,
+      businessName: business.businessName,
+      businessType: business.businessType,
+      businessLocation: business.businessLocation,
+      information: business.information,
+      contactPerson: business.contactPerson,
+      telephoneNumber: business.telephoneNumber,
+      email: business.email,
       result: "Login Successful"
-    }
-    console.log(result)
+    };
     res.status(200).send(result);
+  } else {
+    res.status(401).send({ result: "Invalid email or password" });
   }
-})
+});
 
 // update business data
 async function updateUserById(userId, updateFields) {

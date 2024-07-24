@@ -35,7 +35,7 @@ function UserProfile({ user }) {
     updatedProfile.preferredLanguage = updatingUser.preferredLanguage;
 
     try {
-      let result = await axios.put(`http://localhost:4000/clientdashboard/${user.id}`, {updatedProfile});
+      let result = await axios.put(`http://localhost:3000/clientdashboard/${user.id}`, {updatedProfile});
       console.log(result)
       if (result.data[0].result === "successful") {
         console.log(result.data[0].message)

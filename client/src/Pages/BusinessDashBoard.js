@@ -92,7 +92,7 @@ function BusinessDashBoard () {
       setNewPostTitle('');
       setNewPostContent('');
       setCreatingNewPost(false);
-      // window.location.reload()
+      window.location.reload()
     } catch (error) {
       console.error('Error creating post:', error);
       // Handle error (e.g., show error message to user)

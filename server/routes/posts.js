@@ -16,7 +16,7 @@ router.get('/:id', async (req, res) => {
       [businessId]
     );
 
-    console.log(rows)
+    // console.log(rows)
 
     // Send the fetched posts as a response
     res.json(rows);

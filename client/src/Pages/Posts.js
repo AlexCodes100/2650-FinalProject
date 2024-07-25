@@ -10,19 +10,20 @@ function Posts({ posts, business }) {
   const [updatingPostTitle, setUpdatingPostTitle] = useState("");
   const [updateingPostContent, setUpdatingPostContent] = useState("");
 
-  
-    
   const changingPostContent = (e) => {
     setUpdatingPostContent(e.target.value)
-    console.log(updateingPostContent)
   };
 
   const updatingPost = (e) => {
     setUpdatePost(true);
     let targetPost = posts.find((post) => {
-      if (post.postId == e.target.id)
-      return post.content;
+      let foundPost = {};
+      if (post.postId === e.target.id){
+        foundPost = post;
+      }
+      return foundPost;
     });
+    setUpdatingPostTitle(targetPost.title);
     setUpdatingPostContent(targetPost.content)
     setUpdatePostId(e.target.id);
   };
@@ -34,6 +35,7 @@ function Posts({ posts, business }) {
   }
 
   const submitUpdatedPost = async (e) => {
+    e.preventDefault();
     try {
       await axios.put(`http://localhost:3000/posts/${e.target.id}`, { 
         businessId: business.id,
@@ -98,36 +100,32 @@ function Posts({ posts, business }) {
         <p>No posts from followed businesses yet.</p>
       ) : Array.isArray(posts) ?(
         posts.map((post) => (
-          updatePost && updatePostId == post.postId? 
+          updatePost && updatePostId === post.postId.toString()? 
           // post update form
-          <Card key={post.id} className="mb-4">
+          <Card key={post.postId} className="mb-4">
             <Card.Body>
               <Card.Title>Updating {post.title}</Card.Title>
               <Card.Subtitle className="mb-2 text-muted">By: {post.businessName}</Card.Subtitle>
               {/* <Card.Text>{post.content}</Card.Text> */}
-              <Form onSubmit={submitUpdatedPost}>
+              <Form id={post.postId} onSubmit={submitUpdatedPost}>
                 <Form.Group controlId="formBasicTitle">
                   <Form.Label>Title</Form.Label>
-                  <Form.Control type="text" placeholder="Enter title" value={post.title} onChange={(e) => setUpdatingPostTitle(e.target.value)}/>
+                  <Form.Control type="text" placeholder="Enter title" value={updatingPostTitle} onChange={(e) => setUpdatingPostTitle(e.target.value)}/>
                 </Form.Group>
                 <Form.Group controlId="formBasicContent">
                   <Form.Label>Content</Form.Label>
                   <Form.Control type="text" placeholder="Enter content" value={updateingPostContent} onChange={changingPostContent}/>
                 </Form.Group>
-                <Button variant="primary" type="submit" id={post.postId}>
-                  Submit
-                </Button>
+                <Button variant="primary" type="submit" >Submit</Button>
                 <Button variant="secondary" onClick={cancelUpdatingPost}>Cancel</Button>
               </Form>
               <Card.Footer>
                 <small className="text-muted">Posted on: {new Date(post.createDate).toLocaleDateString()}</small>
               </Card.Footer>
-              <Button variant="primary" id={post.postId} onClick={updatingPost} >Update</Button>
-              <Button variant="danger" id={post.postId} onClick={deletePost}>Delete</Button> 
             </Card.Body>
           </Card>:
           // Posts content display
-          <Card key={post.id} className="mb-4">
+          <Card key={post.postId} className="mb-4">
             <Card.Body>
               <Card.Title>{post.title}</Card.Title>
               <Card.Subtitle className="mb-2 text-muted">By: {post.businessName}</Card.Subtitle>

@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { Container, Row, Col, Card, Button } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
@@ -34,7 +35,7 @@ function LandingPage() {
                         <li>for $50 you will get all the tolls to succeed in Vancouver in one box. </li>
                         <li>It is like coming to Vancouver with a native Vancouverite, this box will avoid you all the headache.  </li> 
                       </ul>
-                      <Button variant="secondary"  className="mt-3 mx-auto d-block"> MoreDetails</Button>
+                      <Button variant="secondary"  className="mt-3 mx-auto d-block"> More Details</Button>
                     </Card.Body>
                   </Card>
                 </Col>
@@ -58,7 +59,7 @@ function LandingPage() {
                 <Card.Img variant="top" src="photos/landing-about.jpg"/>
                 <Card.Body className="d-flex flex-column justify-content-between">
                   <div>
-                    <Card.Title className="text-center">About Us</Card.Title>
+                    <Card.Title className="text-center">About</Card.Title>
                     <Card.Text>
                      We are three friends that came to Canada to get more opportunities and challenge ourself.
                      After going through an heavy administration process and divers information that cost a lot of money and stress all that in a different language . 
@@ -66,7 +67,9 @@ function LandingPage() {
                      Because we know what you are going through. 
                     </Card.Text>
                   </div>
-                  <Button variant="secondary" className="mt-3 mx-auto d-block">More about Us</Button>
+                  <Link to="/about" style={{ textDecoration: 'none' }}>
+                  <Button variant="secondary" className="mt-3 mx-auto d-block">More details</Button>
+                </Link>               
                 </Card.Body>
               </Card>
             </Col>

@@ -61,6 +61,7 @@ async function startServer() {
     // Enable CORS
     app.use(cors({
       origin: process.env.CORS_ORIGIN,
+      credentials: true,
     }));
     // app.use(cors());
 
@@ -72,8 +73,9 @@ async function startServer() {
         resave: false,
         saveUninitialized: false,
         cookie: {
-          secure: process.env.NODE_ENV === 'production', // Set to true if using HTTPS
+          secure: false,
           httpOnly: true,
+          sameSite: 'Lax',
           maxAge: 1000 * 60 * 60 * 24, // 1 day
         },
       })
@@ -84,11 +86,11 @@ async function startServer() {
     app.use(passport.session());
 
     // Middleware to make user available in templates
-    app.use((req, res, next) => {
-      console.log('Setting user in res.locals:', req.user);
-      res.locals.user = req.user || null;
-      next();
-    });
+    // app.use((req, res, next) => {
+    //   console.log('Setting user in res.locals:', req.user);
+    //   res.locals.user = req.user || null;
+    //   next();
+    // });
 
     // Routes
     app.use("/", indexRouter);

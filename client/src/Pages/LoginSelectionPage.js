@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './LoginSelectionPage.css';
 import Navbar from '../Components/NavBar.js'
 import axios from 'axios';
@@ -8,6 +8,18 @@ const LoginSelectionPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const queryParams = new URLSearchParams(window.location.search);
+    const googleLogin = queryParams.get('googleLogin');
+    const userData = queryParams.get('user');
+
+    if (googleLogin && userData) {
+      const parsedUserData = JSON.parse(decodeURIComponent(userData));
+      localStorage.setItem('ImmivanRole', JSON.stringify({ ...parsedUserData, role: 'client' }));
+      navigate("/clientDashboard");
+    }
+  }, [navigate]);
 
   const handleEmailChange = (e) => {
     setEmail(e.target.value);

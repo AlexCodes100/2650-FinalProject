@@ -98,9 +98,11 @@ router.get('/login/federated/google', passport.authenticate('google'));
 
 // Callback route to handle Google login response
 router.get('/oauth2/redirect/google', passport.authenticate('google', {
-  successReturnToOrRedirect: '/',
-  failureRedirect: '/login'
-}));
+  failureRedirect: 'http://localhost:4000/loginSelection'
+}), (req, res) => {
+  // Redirect to the client dashboard after successful login
+  res.redirect(`http://localhost:4000/googleLoginSuccess`);
+});
 
 // Route to handle local login
 router.post('/login', passport.authenticate('local'), (req, res) => {
@@ -111,6 +113,24 @@ router.post('/login', passport.authenticate('local'), (req, res) => {
   }
 });
 
+
+// Route to get authenticated user data
+router.get('/user', (req, res) => {
+  console.log('Received request for /user');
+  console.log('Session:', req.session);
+  console.log('Authenticated:', req.isAuthenticated());
+  
+  if (req.isAuthenticated()) {
+    console.log('User is authenticated');
+    console.log('User data:', req.user);
+    res.json({ user: req.user });
+  } else {
+    console.log('User is not authenticated');
+    res.status(401).json({ message: 'Unauthorized' });
+  }
+});
+
+// Route to log out the user
 router.post('/logout', (req, res, next) => {
   req.logout((err) => {
     if (err) { return next(err); }

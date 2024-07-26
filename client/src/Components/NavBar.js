@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { Dropdown, DropdownButton } from 'react-bootstrap';
+import axios from 'axios';
 
 function NavBar() {
   const [loggedIn, setLoggedIn] = useState(false);
@@ -9,14 +10,24 @@ function NavBar() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const userData = JSON.parse(localStorage.getItem('ImmivanRole'));
-    if (userData && (userData.role === "client" || userData.role === "business")) {
-      setLoggedIn(true);
-      setUser(userData);
+    const token = localStorage.getItem('authToken');
+    if (token) {
+      axios.get('http://localhost:3000/auth/user', {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+      .then(response => {
+        setUser(response.data.user);
+        setLoggedIn(true);
+      })
+      .catch(error => {
+        console.error('Error fetching user info:', error);
+        handleLogout();
+      });
     }
   }, []);
 
   const handleLogout = () => {
+    localStorage.removeItem('authToken');
     localStorage.removeItem('ImmivanRole');
     setLoggedIn(false);
     setUser(null);

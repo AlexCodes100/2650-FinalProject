@@ -61,34 +61,19 @@ async function startServer() {
     // Enable CORS
     app.use(cors({
       origin: process.env.CORS_ORIGIN,
+      credentials: true,
     }));
     // app.use(cors());
 
-    // Session management (Redis)
-    app.use(
-      session({
-        store: new RedisStore({ client: redisClient }),
-        secret: process.env.SESSION_SECRET,
-        resave: false,
-        saveUninitialized: false,
-        cookie: {
-          secure: process.env.NODE_ENV === 'production', // Set to true if using HTTPS
-          httpOnly: true,
-          maxAge: 1000 * 60 * 60 * 24, // 1 day
-        },
-      })
-    );
-
     // Passport middleware
     app.use(passport.initialize());
-    app.use(passport.session());
 
     // Middleware to make user available in templates
-    app.use((req, res, next) => {
-      console.log('Setting user in res.locals:', req.user);
-      res.locals.user = req.user || null;
-      next();
-    });
+    // app.use((req, res, next) => {
+    //   console.log('Setting user in res.locals:', req.user);
+    //   res.locals.user = req.user || null;
+    //   next();
+    // });
 
     // Routes
     app.use("/", indexRouter);

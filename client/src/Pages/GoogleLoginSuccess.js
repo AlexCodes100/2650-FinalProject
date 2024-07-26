@@ -10,13 +10,23 @@ const GoogleLoginSuccess = () => {
   useEffect(() => {
     const fetchUserInfo = async () => {
       setLoading(true);
-      try {
-        const response = await axios.get('http://localhost:3000/auth/user', { withCredentials: true });
-        localStorage.setItem('ImmivanRole', JSON.stringify({ ...response.data.user, role: 'client' }));
-        navigate("/clientDashboard");
-      } catch (error) {
-        console.error('Error fetching user info:', error);
-        setError('Failed to get user information. Please try again.');
+      const token = new URLSearchParams(window.location.search).get('token');
+      if (token) {
+        localStorage.setItem('authToken', token);
+        try {
+          const response = await axios.get('http://localhost:3000/auth/user', {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          const { user } = response.data;
+          localStorage.setItem('ImmivanRole', JSON.stringify({ ...user, role: 'client' }));
+          navigate("/clientDashboard");
+        } catch (error) {
+          console.error('Error fetching user info:', error);
+          setError('Failed to get user information. Please try again.');
+          setLoading(false);
+        }
+      } else {
+        setError('No token found in URL. Please try again.');
         setLoading(false);
       }
     };

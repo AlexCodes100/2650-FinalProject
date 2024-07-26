@@ -9,15 +9,31 @@ const LoginSelectionPage = () => {
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
 
+
   useEffect(() => {
     const queryParams = new URLSearchParams(window.location.search);
-    const googleLogin = queryParams.get('googleLogin');
-    const userData = queryParams.get('user');
-
-    if (googleLogin && userData) {
-      const parsedUserData = JSON.parse(decodeURIComponent(userData));
-      localStorage.setItem('ImmivanRole', JSON.stringify({ ...parsedUserData, role: 'client' }));
-      navigate("/clientDashboard");
+    const token = queryParams.get('token');
+    console.log('Extracted token from URL:', token); // Debug log
+    if (token) {
+      localStorage.setItem('authToken', token);
+      axios.get('http://localhost:3000/auth/user', {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+      .then(response => {
+        console.log('Received user info from /auth/user:', response.data); // Debug log
+        const { user } = response.data;
+        if (user.role === 'client') {
+          localStorage.setItem('ImmivanRole', JSON.stringify({ ...user, role: 'client' }));
+          navigate("/clientDashboard");
+        } else if (user.role === 'business') {
+          localStorage.setItem('ImmivanRole', JSON.stringify({ ...user, role: 'business' }));
+          navigate("/businessDashboard");
+        }
+      })
+      .catch(error => {
+        console.error('Error fetching user info:', error);
+        navigate("/errorPage");
+      });
     }
   }, [navigate]);
 
@@ -31,20 +47,21 @@ const LoginSelectionPage = () => {
 
   const handleLogin = (e) => {
     e.preventDefault();
-    // Send the email and plain password to the server
+    console.log('Attempting to log in with email:', email); // Debug log
     axios.post('http://localhost:3000/auth/login', { email, password })
       .then(response => {
-        console.log(response.data);
-        if (response.data.role === 'client') {
-          localStorage.setItem('ImmivanRole', JSON.stringify({ ...response.data.user, role: 'client' }));
+        const { token, user } = response.data;
+        localStorage.setItem('authToken', token);
+        if (user.role === 'client') {
+          localStorage.setItem('ImmivanRole', JSON.stringify({ ...user, role: 'client' }));
           navigate("/clientDashboard");
-        } else if (response.data.role === 'business') {
-          localStorage.setItem('ImmivanRole', JSON.stringify({ ...response.data.user, role: 'business' }));
+        } else if (user.role === 'business') {
+          localStorage.setItem('ImmivanRole', JSON.stringify({ ...user, role: 'business' }));
           navigate("/businessDashboard");
         }
       })
       .catch(error => {
-        console.error(error);
+        console.error('Error logging in:', error);
         navigate("/errorPage");
       });
   };

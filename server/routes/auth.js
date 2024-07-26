@@ -5,34 +5,95 @@ import { Strategy as LocalStrategy } from 'passport-local';
 import bcrypt from 'bcrypt';
 import pool from '../config/sqlDB.js';
 import crypto from 'crypto';
+import jwt from 'jsonwebtoken';
+import querystring from 'querystring';
+import axios from 'axios';
 
 const router = express.Router();
 
-// Configure the Google strategy for use by Passport.
-passport.use(new GoogleStrategy({
-  clientID: process.env.GOOGLE_CLIENT_ID,
-  clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-  callbackURL: 'http://localhost:3000/auth/oauth2/redirect/google',
-  scope: ['profile', 'email']
-}, async (issuer, profile, cb) => {
+const generateToken = (user) => {
+  return jwt.sign(user, process.env.JWT_SECRET, { expiresIn: '1d' });
+};
+
+const authenticateJWT = (req, res, next) => {
+  const authHeader = req.headers.authorization;
+  if (authHeader) {
+    const token = authHeader.split(' ')[1];
+    jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
+      if (err) {
+        return res.sendStatus(403);
+      }
+      req.user = user;
+      next();
+    });
+  } else {
+    res.sendStatus(401);
+  }
+};
+
+router.get('/login/federated/google', (req, res) => {
+  const rootUrl = 'https://accounts.google.com/o/oauth2/v2/auth';
+  const options = {
+    redirect_uri: 'http://localhost:3000/auth/oauth2/redirect/google',
+    client_id: process.env.GOOGLE_CLIENT_ID,
+    access_type: 'offline',
+    response_type: 'code',
+    prompt: 'consent',
+    scope: ['profile', 'email', 'https://www.googleapis.com/auth/userinfo.profile'].join(' '),
+    state: JSON.stringify({
+      callbackUrl: '/',
+    }),
+  };
+  console.log('Redirecting to Google OAuth with options:', options); // Debug log
+  res.redirect(`${rootUrl}?${querystring.stringify(options)}`);
+});
+
+router.get('/oauth2/redirect/google', async (req, res) => {
+  const code = req.query.code;
+  console.log('Received code from Google:', code); // Debug log
+
+  const googleTokenUrl = 'https://oauth2.googleapis.com/token';
+  const options = {
+    code,
+    client_id: process.env.GOOGLE_CLIENT_ID,
+    client_secret: process.env.GOOGLE_CLIENT_SECRET,
+    redirect_uri: 'http://localhost:3000/auth/oauth2/redirect/google',
+    grant_type: 'authorization_code',
+  };
+
   try {
-    const [rows] = await pool.query(`SELECT * FROM users WHERE email = ?`, [profile.emails[0].value]);
+    const response = await axios.post(googleTokenUrl, querystring.stringify(options), {
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+    });
+
+    const { id_token, access_token } = response.data;
+    console.log('Received tokens from Google:', { id_token, access_token }); // Debug log
+    const googleUser = jwt.decode(id_token);
+    console.log('Decoded Google user:', googleUser); // Debug log
+
+    const [rows] = await pool.query(`SELECT * FROM users WHERE email = ?`, [googleUser.email]);
     let user;
     if (rows.length === 0) {
-      const placeholderPassword = crypto.randomBytes(16).toString('hex'); // Generate a random placeholder password
-      const hashedPassword = await bcrypt.hash(placeholderPassword, 10); // Hash the placeholder password
+      console.log('User not found, creating new user:', googleUser); // Debug log
+      const placeholderPassword = crypto.randomBytes(16).toString('hex');
+      const hashedPassword = await bcrypt.hash(placeholderPassword, 10);
       const [result] = await pool.query(`INSERT INTO users (firstName, lastName, email, password) VALUES (?, ?, ?, ?)`, 
-        [profile.name.givenName, profile.name.familyName, profile.emails[0].value, hashedPassword]);
-      user = { id: result.insertId, firstName: profile.name.givenName, lastName: profile.name.familyName, email: profile.emails[0].value };
+        [googleUser.given_name, googleUser.family_name, googleUser.email, hashedPassword]);
+      user = { id: result.insertId, firstName: googleUser.given_name, lastName: googleUser.family_name, email: googleUser.email };
     } else {
       user = rows[0];
     }
-    console.log('Authenticated user:', user); // Debug log
-    return cb(null, user);
-  } catch (err) {
-    return cb(err);
+    console.log('Authenticated user:', user);
+    const token = generateToken({ id: user.id, role: 'client' });
+    console.log('Generated JWT:', token);
+    res.redirect(`http://localhost:4000/googleLoginSuccess?token=${token}`);
+  } catch (error) {
+    console.error('Error exchanging code for tokens:', error);
+    res.redirect('/errorPage');
   }
-}));
+});
 
 // Configure the local strategy for use by Passport.
 passport.use(new LocalStrategy(
@@ -48,7 +109,8 @@ passport.use(new LocalStrategy(
         const match = await bcrypt.compare(password, user.password);
         if (match) {
           console.log('Authenticated user:', user); // Debug log
-          return done(null, { ...user, role: 'client' });
+          const token = generateToken({ id: user.id, role: 'client' });
+          return done(null, { user, token });
         }
       }
 
@@ -61,7 +123,8 @@ passport.use(new LocalStrategy(
         const match = await bcrypt.compare(password, business.loginPassword);
         if (match) {
           console.log('Authenticated business:', business); // Debug log
-          return done(null, { ...business, role: 'business' });
+          const token = generateToken({ id: business.id, role: 'business' });
+          return done(null, { user: business, token });
         }
       }
 
@@ -73,61 +136,17 @@ passport.use(new LocalStrategy(
   }
 ));
 
-passport.serializeUser((user, cb) => {
-  console.log('Serializing user:', user); // Debug log
-  cb(null, { id: user.id, role: user.role });
-});
-
-// Deserialize user instance from session
-passport.deserializeUser(async (obj, cb) => {
-  try {
-    if (obj.role === 'client') {
-      const [rows] = await pool.query(`SELECT * FROM users WHERE id = ?`, [obj.id]);
-      cb(null, rows[0]);
-    } else if (obj.role === 'business') {
-      const [rows] = await pool.query(`SELECT * FROM business WHERE id = ?`, [obj.id]);
-      cb(null, rows[0]);
-    }
-  } catch (err) {
-    cb(err);
-  }
-});
-
-// Route to initiate Google login
-router.get('/login/federated/google', passport.authenticate('google'));
-
-// Callback route to handle Google login response
-router.get('/oauth2/redirect/google', passport.authenticate('google', {
-  failureRedirect: 'http://localhost:4000/loginSelection'
-}), (req, res) => {
-  // Redirect to the client dashboard after successful login
-  res.redirect(`http://localhost:4000/googleLoginSuccess`);
-});
 
 // Route to handle local login
-router.post('/login', passport.authenticate('local'), (req, res) => {
-  if (req.user.role === 'client') {
-    res.json({ user: req.user, role: 'client' });
-  } else if (req.user.role === 'business') {
-    res.json({ user: req.user, role: 'business' });
-  }
+router.post('/login', passport.authenticate('local', { session: false }), (req, res) => {
+  const { user, token } = req.user;
+  res.json({ user, token });
 });
 
 
 // Route to get authenticated user data
-router.get('/user', (req, res) => {
-  console.log('Received request for /user');
-  console.log('Session:', req.session);
-  console.log('Authenticated:', req.isAuthenticated());
-  
-  if (req.isAuthenticated()) {
-    console.log('User is authenticated');
-    console.log('User data:', req.user);
-    res.json({ user: req.user });
-  } else {
-    console.log('User is not authenticated');
-    res.status(401).json({ message: 'Unauthorized' });
-  }
+router.get('/user', authenticateJWT, (req, res) => {
+  res.json({ user: req.user });
 });
 
 // Route to log out the user

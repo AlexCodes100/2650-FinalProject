@@ -65,25 +65,8 @@ async function startServer() {
     }));
     // app.use(cors());
 
-    // Session management (Redis)
-    app.use(
-      session({
-        store: new RedisStore({ client: redisClient }),
-        secret: process.env.SESSION_SECRET,
-        resave: false,
-        saveUninitialized: false,
-        cookie: {
-          secure: false,
-          httpOnly: true,
-          sameSite: 'Lax',
-          maxAge: 1000 * 60 * 60 * 24, // 1 day
-        },
-      })
-    );
-
     // Passport middleware
     app.use(passport.initialize());
-    app.use(passport.session());
 
     // Middleware to make user available in templates
     // app.use((req, res, next) => {

@@ -12,6 +12,7 @@ import BusinessDashboard from './Pages/BusinessDashBoard.js';
 import ErrorPage from "./Pages/ErrorPage";
 import NavBar from './Components/NavBar.js';
 import Footer from './Components/Footer.js';
+import GoogleLoginSuccess from './Pages/GoogleLoginSuccess.js';
 
 
 
@@ -23,6 +24,7 @@ const router = createBrowserRouter(
       <Route path="/login" element={<LoginPage />} />
       <Route path="/loginSelection" element={<LoginSelectionPage />} />
       <Route path="/signupSelection" element={<SignupSelectionPage />} />
+      <Route path="/googleLoginSuccess" element={<GoogleLoginSuccess />} />
       <Route path="/dashboard" element={<Dashboard />} />
       <Route element={
         <div>

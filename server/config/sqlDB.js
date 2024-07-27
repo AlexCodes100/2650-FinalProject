@@ -25,7 +25,7 @@ async function initializeTables(pool) {
       purpose TEXT,
       organization VARCHAR(100),
       familySize INT,
-      role ENUM('user', 'business', 'admin') DEFAULT 'user' NOT NULL
+      role ENUM('client', 'business', 'admin') DEFAULT 'client' NOT NULL
     );
   `;
 
@@ -130,7 +130,7 @@ async function createTestAccounts(pool) {
       lastName: 'User',
       email: 'client@example.com',
       password: hashedPassword,
-      role: 'user'
+      role: 'client'
     },
     {
       table: 'users',

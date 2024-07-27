@@ -76,6 +76,34 @@ async function initializeTables(pool) {
     FOREIGN KEY (id) REFERENCES users(id)
   );`
 
+  const createChatTableQuery = `CREATE TABLE IF NOT EXISTS chats (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    businessId INT NOT NULL,
+    clientId INT NOT NULL,
+    createDate DATETIME DEFAULT CURRENT_TIMESTAMP,
+    modifiedDate DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (businessId) REFERENCES business(id),
+    FOREIGN KEY (clientId) REFERENCES users(id)
+);`;
+
+  const createMessageTableQuery = `CREATE TABLE IF NOT EXISTS messages ( 
+    id INT AUTO_INCREMENT PRIMARY KEY, 
+    chatId INT NOT NULL, 
+    senderId INT NOT NULL, 
+    senderRole ENUM('business', 'client') NOT NULL,
+    message TEXT, 
+    createDate DATETIME DEFAULT CURRENT_TIMESTAMP, 
+    FOREIGN KEY (chatId) REFERENCES chats(id), 
+    FOREIGN KEY (senderId) REFERENCES users(id));`;
+
+  // const createChatMessagesStoringTableQuery = `
+  // CREATE TABLE IF NOT EXISTS chatMessages ( 
+  // id INT AUTO_INCREMENT PRIMARY KEY, 
+  // chatId INT NOT NULL, 
+  // messageId INT NOT NULL,
+  // FOREIGN KEY (chatId) REFERENCES chats(id),
+  // FOREIGN KEY (messageId) REFERENCES messages(id) );`;
+
   const connection = await pool.getConnection();
   try {
     await connection.query(createUserTableQuery);
@@ -83,6 +111,7 @@ async function initializeTables(pool) {
     await connection.query(createBusinessPostsTableQuery);
     await connection.query(createPostCommentsTableQuery);
     await connection.query(createLikesTableQuery);
+    await connection.query(createChatTableQuery);
     console.log('SQL tables initialized');
   } finally {
     connection.release();

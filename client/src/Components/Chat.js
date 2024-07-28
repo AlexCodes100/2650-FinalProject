@@ -1,73 +1,95 @@
 import { useState, useEffect } from 'react';
 import io from 'socket.io-client';
-import { Container, Row, Col, Card, Button, Modal, Form } from 'react-bootstrap';
+import { Button, Modal, Form } from 'react-bootstrap';
 import axios from 'axios';
 
-const socket = io.connect('http://localhost:3000');
+// const socket = io.connect('http://localhost:3000');
 
 const Chat = (props) => {
   const [chat, setChat] = useState([]);
+  const [businessId, setBusinessId] = useState(-1);
+  const [clientId, setClientId] = useState(-1);
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState([]);
+  const [socket, setSocket] = useState({});
 
   async function fetchChats(id) {
-    let result = await axios.get(`http://localhost:3000/chats/${id}`);
-    console.log(result.data[0]);
-    setChat(result.data[0]);
+    try {
+      let result = await axios.get(`http://localhost:3000/chats/${id}`);
+      console.log(result.data);
+      setChat(result.data);
+    } catch (err) {
+      console.log(err)
+    }
   }
 
   useEffect(() => {
-    console.log(props.chatId);
+    setBusinessId(props.businessId)
+    let socket = io.connect('http://localhost:3000');
+    setSocket(socket);
     fetchChats(props.chatId);
+    console.log(props.chatId)
     socket.on('receiveMessage', (message) => {
       setMessages((prevMessages) => [...prevMessages, message]);
     });
 
-    return () => {
-      socket.off('receiveMessage');
-    };
+    // return () => {
+    //   socket.off('receiveMessage');
+    // };
   }, []);
 
-  // const sendMessage = () => {
-  //   socket.emit('sendMessage', message);
-  //   setMessage('');
-  // };
+  const sendMessage = async () => {
+    if (message.trim()) {
+      console.log(chat)
+      socket.emit('business chat message', {
+        chatId: props.chatId,
+        businessId: businessId,
+        sender: props.role,
+        clientId: props.clientId,
+        message: message});
+      setMessage('');
+      try {
+      let result = await axios.get(`http://localhost:3000/chats/${props.chatId}`);
+      console.log(result.data);
+      setChat(result.data);
+    } catch (err) {
+      console.log(err)
+    }
+    }
+  };
 
   return (
     <div>
-      <Modal show={props.showChatModal} onHide={props.handleCloseChatModal}> {/* Chat modal */}
-            <Modal.Header closeButton>
-              <Modal.Title>Chat with Customer</Modal.Title>
-            </Modal.Header>
-            {messages}
-            <Modal.Body>
-              <Form>
-                <Form.Group controlId="chatMessage">
-                  <Form.Label>Message</Form.Label>
-                  <Form.Control as="textarea" rows={3} />
-                </Form.Group>
-              </Form>
-            </Modal.Body>
-            <Modal.Footer>
-              <Button variant="secondary" onClick={props.handleCloseChatModal}>
-                Close
-              </Button>
-              <Button variant="primary">
-                Send
-              </Button>
-            </Modal.Footer>
-          </Modal>
-      <div>
-        {messages.map((msg, index) => (
-          <div key={index}>{msg}</div>
-        ))}
-      </div>
-      <input
-        type="text"
-        value={message}
-        onChange={(e) => setMessage(e.target.value)}
-      />
-      <button >Send</button>
+      <Modal show={props.showChatModal} onHide={props.handleCloseChatModal}>
+        {/* Chat modal */}
+        <Modal.Header closeButton>
+          <Modal.Title>Chat with Customer {props.chatRoomClient}</Modal.Title>
+        </Modal.Header>
+        {chat? chat.map((chat) => {
+          return <div key={chat.id}>{chat.message}</div>
+        }):<p>No message yet</p>}
+        {messages}
+        <Modal.Body>
+          <Form>
+            <Form.Group controlId="chatMessage">
+              <Form.Label>Reply</Form.Label>
+              <Form.Control
+              as="textarea"
+              value={message}
+              onChange={(e) => e.target.value.key === 'Enter'? sendMessage():setMessage(e.target.value)}
+              rows={3} />
+            </Form.Group>
+          </Form>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button
+          variant="secondary"
+          onClick={props.handleCloseChatModal}>Close</Button>
+          <Button
+          variant="primary"
+          onClick={sendMessage}>Send</Button>
+        </Modal.Footer>
+      </Modal>
     </div>
   );
 };

@@ -65,34 +65,6 @@ function Posts({ posts, business }) {
     }
   };
 
-  // const companiesPosts = posts.map((post) => {
-  //   updatePost && updatePostId == post.postId?
-  //   post = 
-  //   <div key={`post-${post.postId}`} style={{backgroundColor: "#fff"}}>
-  //     <input
-  //     type="text"
-  //       value={updatingPostTitle}
-  //       onChange={(e) => setUpdatingPostTitle(e.target.value)}
-  //       />
-  //     <textarea
-  //       value={updateingPostContent}
-  //       onChange={changingPostContent}
-  //     />
-  //     <div>{post.likesCount > 1? `${post.likesCount}Likes`:`${post.likesCount}Like`}</div>
-  //     <button id={post.postId} onClick={submitUpdatedPost}>Update</button>
-  //     <button onClick={cancelUpdatingPost}>Cancel</button>
-  //   </div> : 
-  //   post = 
-  //   <div key={`post-${post.postId}`}  style={{backgroundColor: "#fff"}}>
-  //     <p>{post.title}</p>
-  //     <p>{post.content}</p>
-  //     <div>{post.likesCount > 1? `${post.likesCount}Likes`:`${post.likesCount}Like`}</div>
-  //     <button id={post.postId} onClick={updatingPost}>Update</button>
-  //     <button id={post.postId} onClick={deletePost}>Delete</button>
-  //   </div>
-  //   return post;
-  // })
-
   const postsContent = (
     <div className="posts">
       <h2>Posts</h2>

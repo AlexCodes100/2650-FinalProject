@@ -2,13 +2,13 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import { Container, Row, Col, Card, Button, Modal, Form } from 'react-bootstrap';
 import Posts from "./Posts";
-// import io from 'socket.io-client';
+import io from 'socket.io-client';
 import Chat from "../Components/Chat";
-// import "dotenv/config.js";
 
 function BusinessDashBoard () {
   // Business info
   const [business, setBusiness] = useState({
+    // delete soon
     id: '1',
     businessName: 'canada Immigration',
     businessType: 'immigration',
@@ -16,19 +16,17 @@ function BusinessDashBoard () {
     information: 'we help with student visa and PR',
     contactPerson: 'Mr Jean',
     telephoneNumber: '234-443-4543',
-    email: 'Immigration@gmail'
+    email: 'Immigration@gmail',
+    role: "business"
   });
   const [updatedBusiness, setUpdatedBusiness] = useState({});
   // Chat feature
-  const [chatrequests, setChatRequests] = useState([{}]);
-  const [chatMessages, setChatMessages] = useState([{ // Fake chat messages
-    id: 1,
-    clientId: 1,
-    customerName: 'John Doe',
-    message: ['I need help with my visa application.', 'Can you assist me with that?']
-  }]);
+  const [socket, setSocket] = useState(null);
+  const [chatMessages, setChatMessages] = useState([]);
   const [showChatModal, setShowChatModal] = useState(false)
   const [chatRoomId, setChatRoomId] = useState(-1);
+  const [clientId, setClientId] = useState(-1);
+  const [chatRoomClient, setChatRoomClient] = useState("");
   // Posts
   const [posts, setPosts] = useState([{}]);
   // creating new post
@@ -52,11 +50,29 @@ function BusinessDashBoard () {
     }
 
     // fetch chat
+    const newSocket = io.connect('http://localhost:3000');
+    setSocket(socket);
     let chats = [{}];
     (async () => {
-      chats = await axios.post(`http://localhost:4000/chats/:id`, {role: business.role});
-      setChatRequests(chats);
-    })();
+      try {
+        chats = await axios.post(`http://localhost:3000/chats/${business.id}`, {role: business.role});
+        setChatMessages(chats.data);
+        chats.data.forEach((chat) => {
+        newSocket.emit('join', {businessId:chat.businessId, clientId: chat.clientId});
+        });
+        console.log(chats.data)
+      } catch (err) {
+        console.log(err);
+      }
+      })();
+    
+    newSocket.on('chat message', async (msg) => {
+      chats = await axios.post(`http://localhost:3000/chats/${business.id}`, {role: business.role});
+        setChatMessages(chats.data);
+      if (msg.senderRole === "client") {
+        // make the notice
+      }
+    });
     
     // business post
     let companiesPosts = [{}];
@@ -69,6 +85,7 @@ function BusinessDashBoard () {
         console.error('Error fetching posts:', err);
       }
     })();
+    return () => newSocket.disconnect(); // ???
   }, []);
 
   const handleCreatePost = async (e) => {
@@ -134,7 +151,9 @@ function BusinessDashBoard () {
 
   // Chats
   const handleOpenChatModal = (e) => {
-    setChatRoomId(e.target.getAttribute('chatId'));
+    setChatRoomId(e.target.getAttribute('chatid'));
+    setClientId(e.target.getAttribute('clientid'));
+    setChatRoomClient(e.target.getAttribute('chatclientname'));
     setShowChatModal(true)
   };
   const handleCloseChatModal = () => setShowChatModal(false);
@@ -270,29 +289,31 @@ function BusinessDashBoard () {
           <Card>
           <Card.Body>
           <Card.Title>Pending Chats</Card.Title>
-              {chatMessages.map((chat) => {
-                let newMessage = chat.message[chat.message.length-1];
-                // console.log(chat)
+              {chatMessages.length > 0? chatMessages.map((chat) => {
                 return (
                 <Card key={chat.id} className="mb-3">
                   <Card.Body>
-                    <Card.Text><strong>{chat.customerName}</strong></Card.Text>
-                    <Card.Text>{newMessage}</Card.Text>
+                    <Card.Text><strong>{chat.firstName} {chat.lastName}</strong></Card.Text>
+                    <Card.Text>{chat.message? chat.message: <p>No message</p>}</Card.Text>
                     <Button 
                     variant="primary" 
-                    chatId={chat.id} 
-                    chatClientId={chat.clientId}
-                    chatClientName={chat.cilentName}
-                    chatMessages={chat.message}
+                    chatid={chat.id} 
+                    clientid = {chat.clientId}
+                    chatclientname={chat.clientName}
                     onClick={handleOpenChatModal}>Chat</Button> {/* Button to open chat modal */}
                   </Card.Body>
                 </Card>
-              )})}
+              )}): <p>No chats yet</p>}
             </Card.Body>
           </Card>
           {showChatModal? 
           <Chat 
           chatId={chatRoomId}
+          businessId = {business.id}
+          clientId={clientId}
+          role= "business"
+          chatRoomClient={chatRoomClient}
+          socket={socket}
           showChatModal={showChatModal}
           handleCloseChatModal={handleCloseChatModal} />: null}
         </Col>

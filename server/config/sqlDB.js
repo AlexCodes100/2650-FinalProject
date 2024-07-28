@@ -96,14 +96,6 @@ async function initializeTables(pool) {
     FOREIGN KEY (chatId) REFERENCES chats(id), 
     FOREIGN KEY (senderId) REFERENCES users(id));`;
 
-  // const createChatMessagesStoringTableQuery = `
-  // CREATE TABLE IF NOT EXISTS chatMessages ( 
-  // id INT AUTO_INCREMENT PRIMARY KEY, 
-  // chatId INT NOT NULL, 
-  // messageId INT NOT NULL,
-  // FOREIGN KEY (chatId) REFERENCES chats(id),
-  // FOREIGN KEY (messageId) REFERENCES messages(id) );`;
-
   const connection = await pool.getConnection();
   try {
     await connection.query(createUserTableQuery);
@@ -112,6 +104,7 @@ async function initializeTables(pool) {
     await connection.query(createPostCommentsTableQuery);
     await connection.query(createLikesTableQuery);
     await connection.query(createChatTableQuery);
+    await connection.query(createMessageTableQuery);
     console.log('SQL tables initialized');
   } finally {
     connection.release();

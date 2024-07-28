@@ -10,6 +10,7 @@ import { createClient } from "redis";
 import passport from "passport";
 import RedisStore from "connect-redis";
 import registerRouter from "./routes/register.js";
+import pool from "./config/sqlDB.js";
 // import loginRouter from "./routes/login.js";
 import businessDashboardRouter from "./routes/businessDashboard.js"
 import clientDashboardRouter from "./routes/clientDashboard.js"
@@ -112,11 +113,12 @@ async function startServer() {
     // Chat
     const server = http.createServer(app);
     const io = new Server(server, {
-  cors: {
-    origin: "http://localhost:4000",
-    methods: ["GET", "POST"],
-  },
-});
+      cors: {
+        origin: "http://localhost:4000",
+        methods: ["GET", "POST"],
+        credentials: true,
+      },
+    });
 
     io.on('connection', (socket) => {
       console.log('A user connected');
@@ -133,26 +135,27 @@ async function startServer() {
       });
       // Client sends a message
       socket.on('client chat message', async (msg) => {
-        const { chatId, businessId, clientId, chatContent } = msg;
+        const { chatId, businessId, clientId, message } = msg;
         const room = `business_${businessId}_client_${clientId}`;
 
-        console.log(`message: ${chatContent} in room: ${room}`);
+        console.log(`message: ${message} in room: ${room}`);
 
         // Store the message in the database
-        await pool.query('INSERT INTO messages ( chatId, senderId, senderRole, chatContent) VALUES (?, ?, ?)', [chatId, clientId, "client", chatContent]);
+        await pool.query('INSERT INTO messages ( chatId, senderId, senderRole, chatContent) VALUES (?, ?, ?)', [chatId, clientId, "client", message]);
 
         // Emit the message to the specific room
         io.to(room).emit('chat message', msg);
       });
       // business sends a message
       socket.on('business chat message', async (msg) => {
-        const { chatId, businessId, clientId, chatContent } = msg;
+        const { chatId, businessId, clientId, message } = msg;
+        console.log(msg);
         const room = `business_${businessId}_client_${clientId}`;
 
-        console.log(`message: ${chatContent} in room: ${room}`);
+        console.log(`message: ${message} in room: ${room}`);
 
         // Store the message in the database
-        await pool.query('INSERT INTO messages ( chatId, senderId, senderRole, chatContent) VALUES (?, ?, ?)', [chatId, businessId, "business", chatContent]);
+        await pool.query('INSERT INTO messages ( chatId, senderId, senderRole, message) VALUES (?, ?, ?, ?)', [chatId, businessId, "business", message]);
 
         // Emit the message to the specific room
         io.to(room).emit('chat message', msg);
@@ -160,7 +163,7 @@ async function startServer() {
     });
 
     // Start http server
-    app.listen(port, () => {
+    server.listen(port, () => {
       console.log(`Server started at http://localhost:${port}`);
     });
 

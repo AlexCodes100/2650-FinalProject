@@ -16,7 +16,6 @@ const Chat = (props) => {
   async function fetchChats(id) {
     try {
       let result = await axios.get(`http://localhost:3000/chats/${id}`);
-      console.log(result.data);
       setChat(result.data);
     } catch (err) {
       console.log(err)
@@ -28,7 +27,6 @@ const Chat = (props) => {
     let socket = io.connect('http://localhost:3000');
     setSocket(socket);
     fetchChats(props.chatId);
-    console.log(props.chatId)
     socket.on('receiveMessage', (message) => {
       setMessages((prevMessages) => [...prevMessages, message]);
     });
@@ -40,7 +38,6 @@ const Chat = (props) => {
 
   const sendMessage = async () => {
     if (message.trim()) {
-      console.log(chat)
       socket.emit('business chat message', {
         chatId: props.chatId,
         businessId: businessId,
@@ -50,7 +47,6 @@ const Chat = (props) => {
       setMessage('');
       try {
       let result = await axios.get(`http://localhost:3000/chats/${props.chatId}`);
-      console.log(result.data);
       setChat(result.data);
     } catch (err) {
       console.log(err)

@@ -60,7 +60,6 @@ function BusinessDashBoard () {
         chats.data.forEach((chat) => {
         newSocket.emit('join', {businessId:chat.businessId, clientId: chat.clientId});
         });
-        console.log(chats.data)
       } catch (err) {
         console.log(err);
       }

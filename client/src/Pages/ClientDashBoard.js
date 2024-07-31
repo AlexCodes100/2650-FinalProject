@@ -6,6 +6,7 @@ import axios from "axios";
 import { Container, Row, Col, Card, Button, Modal } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import UserProfile from "./UserProfile";
+import Chat from "../Components/Chat";
 
 function ClientDashboard() {
   const [showModal, setShowModal] = useState(false);
@@ -158,7 +159,7 @@ function ClientDashboard() {
         </Modal.Footer>
       </Modal>
     </div>
-
+    <Chat />
 <Card style={{ fontWeight: 'bold',backgroundColor: 'rgba(255, 228, 225, 0.5)', border: 'none', padding: '20px' }}>
         {/* <Card style={{ fontWeight: 'bold',backgroundColor: '#FFE4C4', border: 'none', padding: '20px' }}> */}
           <section className="text-center my-5">

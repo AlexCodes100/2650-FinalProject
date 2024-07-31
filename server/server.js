@@ -10,17 +10,22 @@ import { createClient } from "redis";
 import passport from "passport";
 import RedisStore from "connect-redis";
 import registerRouter from "./routes/register.js";
+import pool from "./config/sqlDB.js";
 // import loginRouter from "./routes/login.js";
 import businessDashboardRouter from "./routes/businessDashboard.js"
 import clientDashboardRouter from "./routes/clientDashboard.js"
 import postRouter from "./routes/posts.js"
 import cors from "cors";
 import authRouter from "./routes/auth.js";
+import chat from "./routes/chat.js";
+// chat
+import http from "http";
+import { Server } from "socket.io";
+
 
 
 // Constants
 const port = process.env.PORT || 3000;
-
 
 // Redis Client Setup
 const redisClient = createClient({
@@ -30,15 +35,14 @@ const redisClient = createClient({
 
 redisClient.on('error', (err) => console.log('Redis Client Error', err));
 
+
+
 async function startServer() {
   try {
     // Connect to Redis
     await redisClient.connect();
     console.log('Connected to Redis');
 
-
-
-    
     // Create http server
     const app = express();
 
@@ -79,7 +83,7 @@ async function startServer() {
     app.use("/", indexRouter);
     app.use("/auth", authRouter);
     app.use("/register", registerRouter);
-    // app.use("/login", loginRouter);
+    app.use("/chats", chat);
     app.use("/businessdashboard", businessDashboardRouter);
     app.use("/clientdashboard", clientDashboardRouter);
     app.use("/posts", postRouter);
@@ -106,8 +110,60 @@ async function startServer() {
       res.render("error");
     });
 
+    // Chat
+    const server = http.createServer(app);
+    const io = new Server(server, {
+      cors: {
+        origin: "http://localhost:4000",
+        methods: ["GET", "POST"],
+        credentials: true,
+      },
+    });
+
+    io.on('connection', (socket) => {
+      console.log('A user connected');
+
+      socket.on('disconnect', () => {
+        console.log('User disconnected');
+      });
+
+      // Join a room for one-to-one chat
+      socket.on('join', ({ businessId, clientId }) => {
+        const room = `business_${businessId}_client_${clientId}`;
+        socket.join(room);
+        console.log(`Client ${clientId} joined room for business ${businessId}`);
+      });
+      // Client sends a message
+      socket.on('client chat message', async (msg) => {
+        const { chatId, businessId, clientId, message } = msg;
+        const room = `business_${businessId}_client_${clientId}`;
+
+        console.log(`message: ${message} in room: ${room}`);
+
+        // Store the message in the database
+        await pool.query('INSERT INTO messages ( chatId, senderId, senderRole, chatContent) VALUES (?, ?, ?)', [chatId, clientId, "client", message]);
+
+        // Emit the message to the specific room
+        io.to(room).emit('chat message', msg);
+      });
+      // business sends a message
+      socket.on('business chat message', async (msg) => {
+        const { chatId, businessId, clientId, message } = msg;
+        console.log(msg);
+        const room = `business_${businessId}_client_${clientId}`;
+
+        console.log(`message: ${message} in room: ${room}`);
+
+        // Store the message in the database
+        await pool.query('INSERT INTO messages ( chatId, senderId, senderRole, message) VALUES (?, ?, ?, ?)', [chatId, businessId, "business", message]);
+
+        // Emit the message to the specific room
+        io.to(room).emit('chat message', msg);
+      });
+    });
+
     // Start http server
-    app.listen(port, () => {
+    server.listen(port, () => {
       console.log(`Server started at http://localhost:${port}`);
     });
 

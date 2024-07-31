@@ -2,10 +2,13 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import { Container, Row, Col, Card, Button, Modal, Form } from 'react-bootstrap';
 import Posts from "./Posts";
-// import "dotenv/config.js";
+import io from 'socket.io-client';
+import Chat from "../Components/Chat";
 
 function BusinessDashBoard () {
+  // Business info
   const [business, setBusiness] = useState({
+    // delete soon
     id: '1',
     businessName: 'canada Immigration',
     businessType: 'immigration',
@@ -13,33 +16,31 @@ function BusinessDashBoard () {
     information: 'we help with student visa and PR',
     contactPerson: 'Mr Jean',
     telephoneNumber: '234-443-4543',
-    email: 'Immigration@gmail'
+    email: 'Immigration@gmail',
+    role: "business"
   });
   const [updatedBusiness, setUpdatedBusiness] = useState({});
-  // const [chatrequests, setChatRequests] = useState([{}]);
-  const [chatMessages, setChatMessages] = useState([{ //! added
-    id: 1,
-    customerName: 'John Doe',
-    message: 'I need help with my visa application.'//! end
-  }]);
+  // Chat feature
+  const [socket, setSocket] = useState(null);
+  const [chatMessages, setChatMessages] = useState([]);
   const [showChatModal, setShowChatModal] = useState(false)
-  // const [changeInfoMode, setUpdatedBusinessMode] = useState(false);
+  const [chatRoomId, setChatRoomId] = useState(-1);
+  const [clientId, setClientId] = useState(-1);
+  const [chatRoomClient, setChatRoomClient] = useState("");
+  // Posts
   const [posts, setPosts] = useState([{}]);
+  // creating new post
   const [newPostTitle, setNewPostTitle] = useState('');
   const [newPostContent, setNewPostContent] = useState('');
   const [creatingNewPost, setCreatingNewPost] = useState(false);
-  // const [updatePost, setUpdatePost] = useState(false);
-  // const [updatePostId, setUpdatePostId] = useState(-1);
-  // const [updatingPostTitle, setUpdatingPostTitle] = useState("");
-  // const [updateingPostContent, setUpdatingPostContent] = useState("");
-  const [showModal, setShowModal] = useState(false); //!added
+  const [showModal, setShowModal] = useState(false);
+  // Error handling
   const [error, setError] = useState(false);
 
   
 
   useEffect(() => {
     // fetch business data
-    // const serverAddress = process.env.SERVERADDRESS;
     const data = JSON.parse(localStorage.getItem('ImmivanRole'));
     if (data) {
       setBusiness(data);
@@ -49,17 +50,33 @@ function BusinessDashBoard () {
     }
 
     // fetch chat
-    // let chats = [{}];
-    // (async () => {
-    //   chats = await axios.get(`http://localhost:4000/chats/:id`)
-    //   setChatRequests(chats);
-    // })();
+    const newSocket = io.connect('http://localhost:3000');
+    setSocket(socket);
+    let chats = [{}];
+    (async () => {
+      try {
+        chats = await axios.post(`http://localhost:3000/chats/${business.id}`, {role: business.role});
+        setChatMessages(chats.data);
+        chats.data.forEach((chat) => {
+        newSocket.emit('join', {businessId:chat.businessId, clientId: chat.clientId});
+        });
+      } catch (err) {
+        console.log(err);
+      }
+      })();
+    
+    newSocket.on('chat message', async (msg) => {
+      chats = await axios.post(`http://localhost:3000/chats/${business.id}`, {role: business.role});
+        setChatMessages(chats.data);
+      if (msg.senderRole === "client") {
+        // make the notice
+      }
+    });
     
     // business post
     let companiesPosts = [{}];
     (async () => {
       try {
-        // companiesPosts = await axios.get(`http://localhost:3000/posts/${data.id}`);
         companiesPosts = await axios.get(`http://localhost:3000/posts/${business.id}`);
         setPosts(companiesPosts.data);
       } catch (err) {
@@ -67,18 +84,9 @@ function BusinessDashBoard () {
         console.error('Error fetching posts:', err);
       }
     })();
+    return () => newSocket.disconnect(); // ???
   }, []);
 
-  // Business Profile Event Handlers
-  // const changeBusinessInfoHandler = () => {
-  //   console.log(business.id)
-  //   setUpdatedBusinessMode(true);
-  // }
-
-  // const cancelInputChangeHandler = () => {
-  //   setUpdatedBusinessMode(false);
-  //   setError(false);
-  // }
   const handleCreatePost = async (e) => {
     e.preventDefault();
     if (!newPostContent.trim()) return;
@@ -140,118 +148,15 @@ function BusinessDashBoard () {
     
   };
 
-  const creatingNewPostHandler = () => {
-    setCreatingNewPost(true);
-  }
-  const cancelCreatingNewPostHandler = () => {
-    setCreatingNewPost(false);
-  }
-
   // Chats
-  const handleOpenChatModal = () => setShowChatModal(true);
+  const handleOpenChatModal = (e) => {
+    setChatRoomId(e.target.getAttribute('chatid'));
+    setClientId(e.target.getAttribute('clientid'));
+    setChatRoomClient(e.target.getAttribute('chatclientname'));
+    setShowChatModal(true)
+  };
   const handleCloseChatModal = () => setShowChatModal(false);
 
-  // Contents
-  // const businessInfo = (
-  //   <>
-  //     <ul>
-  //       <li>Business type: {business.businessType}</li>
-  //       <li>Business location: {business.businessLocation}</li>
-  //       <li>Information: {business.information}</li>
-  //       <li>Contact Person: {business.contactPerson}</li>
-  //       <li>Contact number: {business.telephoneNumber}</li>
-  //     </ul>
-  //     <button onClick={changeBusinessInfoHandler}>Update Information</button>
-  //   </>
-  // );
-  // const createPostForm = (
-  //   <form onSubmit={handleCreatePost}>
-  //     <input
-  //     value={newPostTitle}
-  //     onChange={(e) => setNewPostTitle(e.target.value)}
-  //     placeholder="New Title"
-  //     required
-  //     />
-  //     <textarea
-  //       value={newPostContent}
-  //       onChange={(e) => setNewPostContent(e.target.value)}
-  //       placeholder="Write a new post..."
-  //       required
-  //     />
-  //     <button type="submit">Create Post</button>
-  //     <button type="button" onClick={cancelCreatingNewPostHandler}>Cancel</button>
-  //   </form>
-  // )
-  // const updatingBusinessInfo = (
-  //   <form onSubmit={submitUpdatedBusinessInfoHandler}>
-  //     <div>
-  //       <label htmlFor="businessType">Business type:</label>
-  //       <input
-  //         type="text"
-  //         id="businessType"
-  //         name="businessType"
-  //         value={updatedBusiness.businessType || ""}
-  //         onChange={inputChangeHandler}
-  //       />
-  //     </div>
-  //     <div>
-  //       <label htmlFor="businessLocation">Business location:</label>
-  //       <input
-  //         type="text"
-  //         id="businessLocation"
-  //         name="businessLocation"
-  //         value={updatedBusiness.businessLocation || ""}
-  //         onChange={inputChangeHandler}
-  //       />
-  //     </div>
-  //     <div>
-  //       <label htmlFor="information">Information:</label>
-  //       <textarea
-  //         id="information"
-  //         name="information"
-  //         value={updatedBusiness.information || ""}
-  //         onChange={inputChangeHandler}
-  //       />
-  //     </div>
-  //     <div>
-  //       <label htmlFor="contactPerson">Contact Person:</label>
-  //       <input
-  //         type="text"
-  //         id="contactPerson"
-  //         name="contactPerson"
-  //         value={updatedBusiness.contactPerson || ""}
-  //         onChange={inputChangeHandler}
-  //       />
-  //     </div>
-  //     <div>
-  //       <label htmlFor="telephoneNumber">Contact number:</label>
-  //       <input
-  //         type="tel"
-  //         id="telephoneNumber"
-  //         name="telephoneNumber"
-  //         value={updatedBusiness.telephoneNumber || ""}
-  //         onChange={inputChangeHandler}
-  //       />
-  //     </div>
-  //     <div>
-  //       {error? <p style={{ color: "red" }}>Error occur while updating. Please try again. If the error continues, please contact us.</p>:<></>}
-  //     </div>
-  //     <button type="submit">Save Changes</button>
-  //     <button type="button" onClick={cancelInputChangeHandler}>Cancel</button>
-  //   </form>
-  // );
-
-  
-
-// let clientChats = (
-//   chatrequests.map((chat) => (
-//         <div key={chat.id}>
-//           <p>{chat.client.displayname}</p>
-//           <img src={chat.client.profilePic} />
-//           <p>{chat.message[chat.message.length()-1]}</p>
-//         </div>
-//       ))
-// )
 
   return (
     <Container className="business-dashboard mt-4">
@@ -380,45 +285,40 @@ function BusinessDashBoard () {
               </Form>
             </Card.Body>
           </Card>
-         <Card>
-  <Card.Body>
-  <Card.Title>Pending Chats</Card.Title>
-      {chatMessages.map((chat, index) => (
-        <Card key={index} className="mb-3">
+          <Card>
           <Card.Body>
-            <Card.Text><strong>{chat.customerName}</strong></Card.Text>
-            <Card.Text>{chat.message}</Card.Text>
-            <Button variant="primary" onClick={handleOpenChatModal}>Chat</Button> {/* Button to open chat modal */}
-          </Card.Body>
-        </Card>
-      ))}
-    </Card.Body>
-  </Card>
-
-          <Modal show={showChatModal} onHide={handleCloseChatModal}> {/* Chat modal */}
-            <Modal.Header closeButton>
-              <Modal.Title>Chat with Customer</Modal.Title>
-            </Modal.Header>
-            <Modal.Body>
-              <Form>
-                <Form.Group controlId="chatMessage">
-                  <Form.Label>Message</Form.Label>
-                  <Form.Control as="textarea" rows={3} />
-                </Form.Group>
-              </Form>
-            </Modal.Body>
-            <Modal.Footer>
-              <Button variant="secondary" onClick={handleCloseChatModal}>
-                Close
-              </Button>
-              <Button variant="primary">
-                Send
-              </Button>
-            </Modal.Footer>
-          </Modal>
+          <Card.Title>Pending Chats</Card.Title>
+              {chatMessages.length > 0? chatMessages.map((chat) => {
+                return (
+                <Card key={chat.id} className="mb-3">
+                  <Card.Body>
+                    <Card.Text><strong>{chat.firstName} {chat.lastName}</strong></Card.Text>
+                    <Card.Text>{chat.message? chat.message: <p>No message</p>}</Card.Text>
+                    <Button 
+                    variant="primary" 
+                    chatid={chat.id} 
+                    clientid = {chat.clientId}
+                    chatclientname={chat.clientName}
+                    onClick={handleOpenChatModal}>Chat</Button> {/* Button to open chat modal */}
+                  </Card.Body>
+                </Card>
+              )}): <p>No chats yet</p>}
+            </Card.Body>
+          </Card>
+          {showChatModal? 
+          <Chat 
+          chatId={chatRoomId}
+          businessId = {business.id}
+          clientId={clientId}
+          role= "business"
+          chatRoomClient={chatRoomClient}
+          socket={socket}
+          showChatModal={showChatModal}
+          handleCloseChatModal={handleCloseChatModal} />: null}
         </Col>
       </Row>
     </Container>
+    
   )
 }
 

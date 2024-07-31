@@ -49,6 +49,7 @@ async function initializeTables(pool) {
   CREATE TABLE IF NOT EXISTS businessPosts (
     postId INT AUTO_INCREMENT PRIMARY KEY,
     businessId INT NOT NULL,
+    businessName VARCHAR(100) NOT NULL,
     title VarChar(200),
     content TEXT,
     likesCount INT DEFAULT 0,

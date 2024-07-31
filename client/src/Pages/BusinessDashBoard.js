@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect,memo } from "react";
 import axios from "axios";
 import { Container, Row, Col, Card, Button, Modal, Form } from 'react-bootstrap';
 import Posts from "./Posts";
@@ -157,6 +157,30 @@ function BusinessDashBoard () {
   };
   const handleCloseChatModal = () => setShowChatModal(false);
 
+  const PendingChats = memo(function PendingChats({chatMessages}) {
+    return (
+        <Card.Body>
+          <Card.Title>Pending Chats</Card.Title>
+          {chatMessages.length > 0? chatMessages.map((chat) => {
+            return (
+            <Card key={chat.id} className="mb-3">
+              <Card.Body>
+                <Card.Text><strong>{chat.firstName} {chat.lastName}</strong></Card.Text>
+                <Card.Text>{chat.message? chat.message: <p>No message</p>}</Card.Text>
+                <Button 
+                variant="primary" 
+                chatid={chat.id} 
+                clientid = {chat.clientId}
+                chatclientname={chat.clientName}
+                onClick={handleOpenChatModal}>Chat</Button> {/* Button to open chat modal */}
+              </Card.Body>
+            </Card>
+          )}): <p>No chats yet</p>}
+        </Card.Body>
+    )
+  }, [chatMessages]);
+
+
 
   return (
     <Container className="business-dashboard mt-4">
@@ -286,7 +310,7 @@ function BusinessDashBoard () {
             </Card.Body>
           </Card>
           <Card>
-          <Card.Body>
+          {/* <Card.Body>
           <Card.Title>Pending Chats</Card.Title>
               {chatMessages.length > 0? chatMessages.map((chat) => {
                 return (
@@ -300,10 +324,11 @@ function BusinessDashBoard () {
                     clientid = {chat.clientId}
                     chatclientname={chat.clientName}
                     onClick={handleOpenChatModal}>Chat</Button> {/* Button to open chat modal */}
-                  </Card.Body>
-                </Card>
-              )}): <p>No chats yet</p>}
-            </Card.Body>
+                  {/* </Card.Body>
+                </Card> */}
+              {/* )}): <p>No chats yet</p>}
+            </Card.Body> */}
+            <PendingChats chatMessages={chatMessages}/>
           </Card>
           {showChatModal? 
           <Chat 

@@ -47,7 +47,7 @@ const Chat = (props) => {
     setClientId(props.clientId)
     let socket = io.connect('http://localhost:3000');
     setSocket(socket);
-    socket.emit('join',{businessId:props.businessId,clientId:props.client});
+    socket.emit('join',{businessId:props.businessId,clientId:props.clientId});
     let tempChatId;
       if (props.chatId === -1) {
         console.log("check")
@@ -67,8 +67,14 @@ const Chat = (props) => {
       }
       });
       socket.on('chatId', (chatId) => {
+        if (chatId.chatid){
+          setChatId(chatId.chatid);
+        } else {
+          setChatId(chatId);
+        }
+        // let tempChatId = {chatId: chatId};
         console.log('chatId:', chatId);
-        setChatId(chatId.chatId);
+        // setChatId(tempChatId.chatId);
       });
     // return () => {
     //   socket.off('receiveMessage');
@@ -85,6 +91,7 @@ const Chat = (props) => {
         message: message});
       setMessage('');
     } else if (message.trim() && props.role === 'client') {
+      console.log(chatId)
       socket.emit('client chat message', {
         chatId: chatId,
         clientId: clientId,

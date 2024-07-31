@@ -75,7 +75,7 @@ function ClientDashboard() {
                 // console.log(eachBuesiness)
                 return eachBuesiness;
               });
-              // console.log(merge);
+              console.log(merge);
               setFollowedbusiness(merge)
             } catch (error) {
               console.error("Failed to fetch chats:", error);
@@ -235,10 +235,10 @@ function ClientDashboard() {
             <Card.Body>
               <Card.Title>Followed Companies</Card.Title>
               <FollowedCompanies 
-              companies={recommendedBusinesses}
+              companies={followedbusiness}
               onUnfollow={handleUnfollow}
               onFollow={handleFollow}
-              onChat={handleCloseChatModal}
+              onChat={handleOpenChatModal}
               />
             </Card.Body>:
             <p>No followed Business</p>

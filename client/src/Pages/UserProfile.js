@@ -6,6 +6,7 @@ function UserProfile({ user }) {
   const [updatingUser, setUpdatingUser] = useState(user)
   const [updating, setUpdating] = useState(false);
   const [error, setError] = useState(false);
+  const apiUrl = process.env.REACT_APP_API_URL;
 
   useEffect(() => {
     setUpdatingUser(user);
@@ -35,7 +36,7 @@ function UserProfile({ user }) {
     updatedProfile.preferredLanguage = updatingUser.preferredLanguage;
 
     try {
-      let result = await axios.put(`http://localhost:3000/clientdashboard/${user.id}`, {updatedProfile});
+      let result = await axios.put(`${apiUrl}/clientdashboard/${user.id}`, {updatedProfile});
       console.log(result)
       if (result.data[0].result === "successful") {
         console.log(result.data[0].message)

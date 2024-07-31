@@ -10,6 +10,7 @@ import Chat from "../Components/Chat";
 
 function ClientDashboard() {
   const [showModal, setShowModal] = useState(false);
+  const apiUrl = process.env.REACT_APP_API_URL;
   const [user, setUser] = useState({
     id: '1',
     firstName: 'xavier',
@@ -79,7 +80,7 @@ function ClientDashboard() {
   //     try {
   //       // check the followed companies and find 3 that is not followed
   //       let result = await axios.post(
-  //         `http://localhost:4000/clientdashboard/`,
+  //         `${apiUrl}/clientdashboard/`,
   //         {
   //           followedCompanies: followedCompanies,
   //         }
@@ -106,7 +107,7 @@ function ClientDashboard() {
       // fetch followed companies' posts
       // try {
       //   const response = await axios.get(
-      //     `http://localhost:4000/clientdashboard/${user.id}`
+      //     `${apiUrl}/clientdashboard/${user.id}`
       //   );
       //   setPosts(response.data);
       // } catch (err) {

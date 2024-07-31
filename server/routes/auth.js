@@ -10,6 +10,8 @@ import querystring from 'querystring';
 import axios from 'axios';
 
 const router = express.Router();
+const apiUrl = process.env.SERVER_HOST;
+const clientHost = process.env.CLIENT_HOST;
 
 const generateToken = (user) => {
   return jwt.sign(user, process.env.JWT_SECRET, { expiresIn: '1d' });
@@ -34,7 +36,7 @@ const authenticateJWT = (req, res, next) => {
 router.get('/login/federated/google', (req, res) => {
   const rootUrl = 'https://accounts.google.com/o/oauth2/v2/auth';
   const options = {
-    redirect_uri: 'http://localhost:3000/auth/oauth2/redirect/google',
+    redirect_uri: `${apiUrl}/auth/oauth2/redirect/google`,
     client_id: process.env.GOOGLE_CLIENT_ID,
     access_type: 'offline',
     response_type: 'code',
@@ -57,7 +59,7 @@ router.get('/oauth2/redirect/google', async (req, res) => {
     code,
     client_id: process.env.GOOGLE_CLIENT_ID,
     client_secret: process.env.GOOGLE_CLIENT_SECRET,
-    redirect_uri: 'http://localhost:3000/auth/oauth2/redirect/google',
+    redirect_uri: `${apiUrl}/auth/oauth2/redirect/google`,
     grant_type: 'authorization_code',
   };
 
@@ -88,7 +90,7 @@ router.get('/oauth2/redirect/google', async (req, res) => {
     console.log('Authenticated user:', user);
     const token = generateToken({ id: user.id, role: 'client' });
     console.log('Generated JWT:', token);
-    res.redirect(`http://localhost:4000/googleLoginSuccess?token=${token}`);
+    res.redirect(`${clientHost}/googleLoginSuccess?token=${token}`);
   } catch (error) {
     console.error('Error exchanging code for tokens:', error);
     res.redirect('/errorPage');

@@ -3,7 +3,9 @@ import io from 'socket.io-client';
 import { Button, Modal, Form } from 'react-bootstrap';
 import axios from 'axios';
 
-// const socket = io.connect('http://localhost:3000');
+// const socket = io.connect('${apiUrl}');
+
+const apiUrl = process.env.REACT_APP_API_URL;
 
 const Chat = (props) => {
   const [chat, setChat] = useState([]);
@@ -15,7 +17,7 @@ const Chat = (props) => {
 
   async function fetchChats(id) {
     try {
-      let result = await axios.get(`http://localhost:3000/chats/${id}`);
+      let result = await axios.get(`${apiUrl}/chats/${id}`);
       setChat(result.data);
     } catch (err) {
       console.log(err)
@@ -24,7 +26,7 @@ const Chat = (props) => {
 
   useEffect(() => {
     setBusinessId(props.businessId)
-    let socket = io.connect('http://localhost:3000');
+    let socket = io.connect(`${apiUrl}`);
     setSocket(socket);
     fetchChats(props.chatId);
     socket.on('receiveMessage', (message) => {
@@ -46,7 +48,7 @@ const Chat = (props) => {
         message: message});
       setMessage('');
       try {
-      let result = await axios.get(`http://localhost:3000/chats/${props.chatId}`);
+      let result = await axios.get(`${apiUrl}/chats/${props.chatId}`);
       setChat(result.data);
     } catch (err) {
       console.log(err)

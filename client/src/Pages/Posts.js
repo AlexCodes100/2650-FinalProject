@@ -9,6 +9,7 @@ function Posts({ posts, business }) {
   const [updatePostId, setUpdatePostId] = useState(-1);
   const [updatingPostTitle, setUpdatingPostTitle] = useState("");
   const [updateingPostContent, setUpdatingPostContent] = useState("");
+  const apiUrl = process.env.REACT_APP_API_URL;
 
   const changingPostContent = (e) => {
     setUpdatingPostContent(e.target.value)
@@ -37,7 +38,7 @@ function Posts({ posts, business }) {
   const submitUpdatedPost = async (e) => {
     e.preventDefault();
     try {
-      await axios.put(`http://localhost:3000/posts/${e.target.id}`, { 
+      await axios.put(`${apiUrl}/posts/${e.target.id}`, { 
         businessId: business.id,
         title: updatingPostTitle,
         content: updateingPostContent })
@@ -54,7 +55,7 @@ function Posts({ posts, business }) {
     console.log(business.id)
     if (window.confirm('Are you sure you want to delete this post?')) {
       try {
-        await axios.delete(`http://localhost:3000/posts/${e.target.id}`, {
+        await axios.delete(`${apiUrl}/posts/${e.target.id}`, {
           data:{businessId: business.id}
         });
         window.location.reload();

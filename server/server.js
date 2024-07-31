@@ -26,6 +26,7 @@ import { Server } from "socket.io";
 
 // Constants
 const port = process.env.PORT || 3000;
+const clientHost = process.env.CLIENT_HOST;
 
 // Redis Client Setup
 const redisClient = createClient({
@@ -114,7 +115,7 @@ async function startServer() {
     const server = http.createServer(app);
     const io = new Server(server, {
       cors: {
-        origin: "http://localhost:4000",
+        origin: `${clientHost}`,
         methods: ["GET", "POST"],
         credentials: true,
       },

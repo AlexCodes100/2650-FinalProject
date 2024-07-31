@@ -139,6 +139,7 @@ function SignupPage() {
           >
             <option value="">Select a language</option>
             <option value="English">English</option>
+            <option value="french">French</option>
             <option value="Spanish">Spanish</option>
             <option value="Chinese Traditional">Chinese Traditional</option>
             <option value="Japanese">Japanese</option>

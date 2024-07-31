@@ -3,7 +3,7 @@ import { Card, Button, Form } from 'react-bootstrap';
 import axios from 'axios';
 
 
-function Posts({ posts, business }) {
+function Posts({ posts, business,role}) {
   const errorFetching = <p>Error occurred. Please try again later.</p>;
   const [updatePost, setUpdatePost] = useState(false);
   const [updatePostId, setUpdatePostId] = useState(-1);
@@ -65,6 +65,32 @@ function Posts({ posts, business }) {
     }
   };
 
+  const clientPostConetent = (
+    <div className="posts">
+      <h2>Posts</h2>
+      {posts.length === 0 ? (
+        <p>No posts yet.</p>
+      ) : Array.isArray(posts) ?(
+        posts.map((post) => (
+          // Posts content display
+          <Card key={post.postId} className="mb-4">
+            <Card.Body>
+              <Card.Title>{post.title}</Card.Title>
+              <Card.Subtitle className="mb-2 text-muted">By: {post.businessName}</Card.Subtitle>
+              <Card.Text>{post.content}</Card.Text>
+              <Card.Footer>
+                <small className="text-muted">Posted on: {new Date(post.createDate).toLocaleDateString()}</small>
+              </Card.Footer>
+              {/* <Button variant="primary" id={post.postId} onClick={updatingPost} >Update</Button>
+              <Button variant="danger" id={post.postId} onClick={deletePost}>Delete</Button> */}
+            </Card.Body>
+          </Card>
+        ))
+      ) : (
+        <p>Invalid data format for posts.</p>
+      )}
+    </div>
+  );
   const postsContent = (
     <div className="posts">
       <h2>Posts</h2>
@@ -116,7 +142,7 @@ function Posts({ posts, business }) {
     
     </div>
   );
-  return posts === "Failed to fetch posts. Please try again later."
+  return role === "client"? clientPostConetent:posts === "Failed to fetch posts. Please try again later."
     ? errorFetching
     : postsContent;
 }

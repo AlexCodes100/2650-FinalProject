@@ -51,7 +51,7 @@ function BusinessDashBoard () {
 
     // fetch chat
     const newSocket = io.connect('http://localhost:3000');
-    setSocket(socket);
+    //setSocket(socket);
     let chats = [{}];
     (async () => {
       try {
@@ -312,7 +312,6 @@ function BusinessDashBoard () {
           clientId={clientId}
           role= "business"
           chatRoomClient={chatRoomClient}
-          socket={socket}
           showChatModal={showChatModal}
           handleCloseChatModal={handleCloseChatModal} />: null}
         </Col>

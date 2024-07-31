@@ -119,19 +119,41 @@ async function startServer() {
         credentials: true,
       },
     });
+    const rooms = new Map()
 
     io.on('connection', (socket) => {
       console.log('A user connected');
 
-      socket.on('disconnect', () => {
+      socket.on('disconnect', ({ businessId, clientId }) => {
         console.log('User disconnected');
+        const room = `business_${businessId}_client_${clientId}`;
+        socket.leave(room);
+        rooms.delete(room);
       });
 
       // Join a room for one-to-one chat
-      socket.on('join', ({ businessId, clientId }) => {
+      socket.on('join', async ({ businessId, clientId }) => {
         const room = `business_${businessId}_client_${clientId}`;
         socket.join(room);
+        socket.roomId = room;
+        socket.clientId = clientId;
+        socket.businessId = businessId;
+        rooms.set(room, {clientId, businessId});
         console.log(`Client ${clientId} joined room for business ${businessId}`);
+        await pool.query(` SELECT id FROM chats WHERE businessId = ? AND clientId = ?`, [businessId, clientId])
+        .then(async (res) => {
+          // console.log(res);
+          if (res[0].length === 0) {
+            console.log("No chat found for this user");
+            await pool.query('INSERT INTO chats (businessId, clientId) VALUES (?, ?)', [businessId, clientId])
+            .then(async()=> {
+              await pool.query(` SELECT id FROM chats WHERE businessId = ? AND clientId = ?`, [businessId, clientId])
+            })
+          } else {
+            console.log(res[0][0].id);
+            socket.emit('chatId', res[0][0].id);
+          }
+        })
       });
       // Client sends a message
       socket.on('client chat message', async (msg) => {
@@ -141,7 +163,7 @@ async function startServer() {
         console.log(`message: ${message} in room: ${room}`);
 
         // Store the message in the database
-        await pool.query('INSERT INTO messages ( chatId, senderId, senderRole, chatContent) VALUES (?, ?, ?)', [chatId, clientId, "client", message]);
+        await pool.query('INSERT INTO messages ( chatId, senderId, senderRole, message) VALUES (?, ?, ?, ?)', [chatId, clientId, "client", message]);
 
         // Emit the message to the specific room
         io.to(room).emit('chat message', msg);

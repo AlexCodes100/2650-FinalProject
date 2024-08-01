@@ -37,7 +37,7 @@ function BusinessDashBoard () {
   // Error handling
   const [error, setError] = useState(false);
 
-  
+  const apiUrl = process.env.REACT_APP_API_URL;
 
   useEffect(() => {
     // fetch business data
@@ -50,12 +50,12 @@ function BusinessDashBoard () {
     }
 
     // fetch chat
-    const newSocket = io.connect('http://localhost:3000');
-    //setSocket(socket);
+    const newSocket = io.connect(`${apiUrl}`);
+    setSocket(socket);
     let chats = [{}];
     (async () => {
       try {
-        chats = await axios.post(`http://localhost:3000/chats/${business.id}`, {role: business.role});
+        chats = await axios.post(`${apiUrl}/chats/${business.id}`, {role: business.role});
         setChatMessages(chats.data);
         chats.data.forEach((chat) => {
         newSocket.emit('join', {businessId:chat.businessId, clientId: chat.clientId});
@@ -66,7 +66,7 @@ function BusinessDashBoard () {
       })();
     
     newSocket.on('chat message', async (msg) => {
-      chats = await axios.post(`http://localhost:3000/chats/${business.id}`, {role: business.role});
+      chats = await axios.post(`${apiUrl}/chats/${business.id}`, {role: business.role});
         setChatMessages(chats.data);
       if (msg.senderRole === "client") {
         // make the notice
@@ -77,7 +77,7 @@ function BusinessDashBoard () {
     let companiesPosts = [{}];
     (async () => {
       try {
-        companiesPosts = await axios.get(`http://localhost:3000/posts/${business.id}`);
+        companiesPosts = await axios.get(`${apiUrl}/posts/${business.id}`);
         setPosts(companiesPosts.data);
       } catch (err) {
         setError('An error occurred while fetching posts');
@@ -92,7 +92,7 @@ function BusinessDashBoard () {
     if (!newPostContent.trim()) return;
 
     try {
-      const response = await axios.post('http://localhost:3000/posts/', {
+      const response = await axios.post(`${apiUrl}/posts/`, {
         businessId: business.id,
         title: newPostTitle,
         content: newPostContent
@@ -132,7 +132,7 @@ function BusinessDashBoard () {
 
     try {
       console.log(business.id)
-      let result = await axios.put(`http://localhost:3000/businessdashboard/${business.id}`, {updatedInfo});
+      let result = await axios.put(`${apiUrl}/businessdashboard/${business.id}`, {updatedInfo});
       console.log(result)
       if (result.data[0].result === "successful") {
         console.log(result.data[0].message)

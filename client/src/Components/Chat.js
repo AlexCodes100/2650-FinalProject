@@ -3,7 +3,9 @@ import io from 'socket.io-client';
 import { Button, Modal, Form } from 'react-bootstrap';
 import axios from 'axios';
 
-// const socket = io.connect('http://localhost:3000');
+// const socket = io.connect('${apiUrl}');
+
+const apiUrl = process.env.REACT_APP_API_URL;
 
 const Chat = (props) => {
   const [chat, setChat] = useState([]);
@@ -16,8 +18,7 @@ const Chat = (props) => {
 
   async function fetchChats(id) {
     try {
-      let result = await axios.get(`http://localhost:3000/chats/${id}`);
-      console.log(result.data);
+      let result = await axios.get(`${apiUrl}/chats/${id}`);
       setChat(result.data);
     } catch (err) {
       console.log(err)
@@ -142,7 +143,7 @@ const Chat = (props) => {
     }
       try {
         console.log("Sending message to chatId", chatId);
-      let result = await axios.get(`http://localhost:3000/chats/${chatId}`);
+      let result = await axios.get(`${apiUrl}/chats/${chatId}`);
       setChat(result.data);
     } catch (err) {
       console.log(err)

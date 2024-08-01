@@ -9,6 +9,7 @@ import NavBar from "../Components/NavBar";
 function SignupPage() {
   const navigate = useNavigate();
   const [registrationError, setRegistrationError] = useState("");
+  const apiUrl = process.env.REACT_APP_API_URL;
 
   const formik = useFormik({
     initialValues: {
@@ -42,7 +43,7 @@ function SignupPage() {
     onSubmit: async (values) => {
       try {
         setRegistrationError(""); // Clear previous errors
-        await axios.post("http://localhost:3000/register", values);
+        await axios.post(`${apiUrl}/register`, values);
         alert("Registration successful");
         navigate("/loginSelection"); // Redirect to login page
       } catch (error) {

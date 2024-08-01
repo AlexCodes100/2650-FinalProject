@@ -14,6 +14,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 
 function ClientDashboard() {
   const [showModal, setShowModal] = useState(false);
+  const apiUrl = process.env.REACT_APP_API_URL;
   const [user, setUser] = useState({
     // delete soon once we have the user data from login
     id: '1',

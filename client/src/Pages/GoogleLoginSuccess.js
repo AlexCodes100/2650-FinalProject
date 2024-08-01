@@ -6,6 +6,7 @@ const GoogleLoginSuccess = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
+  const apiUrl = process.env.REACT_APP_API_URL;
 
   useEffect(() => {
     const fetchUserInfo = async () => {
@@ -14,7 +15,7 @@ const GoogleLoginSuccess = () => {
       if (token) {
         localStorage.setItem('authToken', token);
         try {
-          const response = await axios.get('http://localhost:3000/auth/user', {
+          const response = await axios.get(`${apiUrl}/auth/user`, {
             headers: { Authorization: `Bearer ${token}` }
           });
           const { user } = response.data;

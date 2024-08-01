@@ -8,6 +8,7 @@ const LoginSelectionPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
+  const apiUrl = process.env.REACT_APP_API_URL;
 
 
   useEffect(() => {
@@ -16,7 +17,7 @@ const LoginSelectionPage = () => {
     console.log('Extracted token from URL:', token); // Debug log
     if (token) {
       localStorage.setItem('authToken', token);
-      axios.get('http://localhost:3000/auth/user', {
+      axios.get(`${apiUrl}/auth/user`, {
         headers: { Authorization: `Bearer ${token}` }
       })
       .then(response => {
@@ -48,7 +49,7 @@ const LoginSelectionPage = () => {
   const handleLogin = (e) => {
     e.preventDefault();
     console.log('Attempting to log in with email:', email); // Debug log
-    axios.post('http://localhost:3000/auth/login', { email, password })
+    axios.post(`${apiUrl}/auth/login`, { email, password })
       .then(response => {
         const { token, user } = response.data;
         localStorage.setItem('authToken', token);
@@ -67,7 +68,7 @@ const LoginSelectionPage = () => {
   };
 
   const handleGoogleSignIn = () => {
-    window.location.href = 'http://localhost:3000/auth/login/federated/google';
+    window.location.href = `${apiUrl}/auth/login/federated/google`;
   };
 
   return (

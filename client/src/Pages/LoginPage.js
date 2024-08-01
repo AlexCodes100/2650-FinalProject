@@ -6,6 +6,7 @@ function LoginPage () {
   const [password, setPassword] = useState("");
   const [role, setRole] = useState("client");
   const [error, setError] = useState("");
+  const apiUrl = process.env.REACT_APP_API_URL;
 
   const businessRoleChangeHandler = () => {
     setRole("business");
@@ -39,7 +40,7 @@ function LoginPage () {
   const businessLoginHandler = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post("http://localhost:3000/businessdashboard", {
+      const response = await axios.post(`${apiUrl}/businessdashboard`, {
         email: userName,
         password: password
       })

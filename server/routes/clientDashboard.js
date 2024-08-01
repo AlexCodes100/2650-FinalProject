@@ -33,13 +33,35 @@ router.post('/', async (req, res) => {
         LIMIT 3`,
         [followedbusiness]
       );
-      // console.log(recommendedCompanies)
+      // Limit 3???
     res.json(recommendedCompanies);
   } catch (error) {
     console.error('Error fetching recommended businesses',error) 
     res.status(500).json({ error: 'Failed to fetch recommended businesses' });
   }
 };
+
+router.post('/:id', async (req, res) => {
+  const userId = parseInt(req.params.id, 10);
+  const followingBusiness= parseInt(req.body.businessId);
+  if (req.body.action === "follow business") {
+    try {
+      await pool.query('INSERT INTO followedBusinesses (userId, businessId) VALUES (?, ?)', [userId, followingBusiness]);
+      res.json({ result:"success", message: 'Business followed' });
+    } catch (error) {
+      console.error('Error following business:', error);
+      res.status(500).json({ error: 'Failed to follow business' });
+    }
+  } else if (req.body.action === "unfollow business") {
+    try {
+      await pool.query('DELETE FROM followedBusinesses WHERE userId = ? AND businessId = ?', [userId, followingBusiness]);
+      res.json({ result:"success", message: 'Business unfollowed' });
+    } catch (error) {
+      console.error('Error unfollowing business:', error);
+      res.status(500).json({ error: 'Failed to unfollow business' });
+    }
+  }
+});
 
 // try {
   //   const query = `
@@ -65,12 +87,12 @@ router.post('/', async (req, res) => {
     // );
     // res.json(posts);
   // });
-// Fetch followed companies' posts
+// Fetch followed companies
 router.get('/:userId', async (req, res) => {
   const userId = parseInt(req.params.userId, 10);
   try {
     const results = await pool.query('SELECT f.businessId, b.businessName FROM followedBusinesses f LEFT JOIN business b ON f.businessId = b.id WHERE userId = ?', [userId]);
-    // console.log(results)
+    console.log("fetched business: ", results)
     if (!results[0][0].businessId) {
       console.log('No followed businesses');
       return res.json(["No followed businesses"]);

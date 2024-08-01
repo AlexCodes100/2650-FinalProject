@@ -17,6 +17,7 @@ const Chat = (props) => {
   async function fetchChats(id) {
     try {
       let result = await axios.get(`http://localhost:3000/chats/${id}`);
+      console.log(result.data);
       setChat(result.data);
     } catch (err) {
       console.log(err)
@@ -24,52 +25,89 @@ const Chat = (props) => {
   }
 
   async function fetchChatId(businessId,clientId){
-      try{
-        let result = await axios.post(`http://localhost:3000/chats`,
-          {
-            businessId:businessId,
-            clientId: clientId
-          });
-          if(true){
-            console.log(result.data);
-          } else{
-            console.log(result.data[0].id);
-            setChatId(result.date[0].id);
+    let id;
+    try{
+      id = await axios.post(`http://localhost:3000/chats`,
+        {
+          businessId:businessId,
+          clientId: clientId
+        }).then((res) => {
+          if(res.data.length === 0){
+            console.log("No chat found for this user and business");
+            console.log(res.data);
+          } else {
+            console.log(res.data[0].id);
+            setChatId(res.data[0].id);
           }
-  }catch(err){
-    console.log(err);
-  }
+          return res;
+        }).then(async (res) => {
+          console.log("fetching chat");
+          let result = await axios.get(`http://localhost:3000/chats/${res.data[0].id}`);
+          setChat(result.data);
+          return res;
+        });
+    }catch(err){
+      console.log(err);
+    }
+    return id.data[0].id;
   }
   useEffect(() => {
     console.log('chatId',props.chatId,'businessId:',props.businessId,
       'clientId:',props.clientId);
+      // set business id and client id
     setBusinessId(props.businessId)
     setClientId(props.clientId)
+    // create a socket connection
     let socket = io.connect('http://localhost:3000');
     setSocket(socket);
+    // join the chat room
     socket.emit('join',{businessId:props.businessId,clientId:props.clientId});
     let tempChatId;
+    // if there is no chat id from the props, fetch the chat id
       if (props.chatId === -1) {
-        console.log("check")
+        console.log("chatId id set to -1")
         fetchChatId(props.businessId, props.clientId);
+        console.log("tempChatId:",tempChatId);
+        console.log(tempChatId);
       } else {
-    fetchChats(props.chatId);
-    setChatId(props.chatId);
+        console.log("chatId id set to props.chatId:",props.chatId)
+        fetchChats(props.chatId);
+        setChatId(props.chatId);
         tempChatId = props.chatId;
       }
       socket.on('chat message', async (message) => {
-        console.log('message received:', message);
-        try {
-        let result = await axios.get(`http://localhost:3000/chats/${tempChatId}`);
-        setChat(result.data);
-      } catch (err) {
-        console.log(err)
-      }
+        // console.log('message received:', message);
+        if (tempChatId) {
+          console.log('temp chatId:', tempChatId);
+          try {
+            let result = await axios.get(`http://localhost:3000/chats/${tempChatId}`);
+            setChat(result.data);
+          } catch (err) {
+            console.log(err)
+          }
+        } else {
+          console.log('original chatId:', chatId);
+          try {
+            let result = await axios.get(`http://localhost:3000/chats/${chatId}`);
+            setChat(result.data);
+          } catch (err) {
+            console.log(err)
+          }
+        }
+      //   try {
+      //   let result = await axios.get(`http://localhost:3000/chats/${tempChatId}`);
+      //   setChat(result.data);
+      // } catch (err) {
+      //   console.log(err)
+      // }
       });
       socket.on('chatId', (chatId) => {
-        if (chatId.chatid){
+        // console.log('chatId:', chatId);
+        if (chatId.chatId){
+          console.log("no chatId.chatid")
           setChatId(chatId.chatid);
         } else {
+          console.log('Setting chatId:', chatId); 
           setChatId(chatId);
         }
         // let tempChatId = {chatId: chatId};
@@ -83,6 +121,7 @@ const Chat = (props) => {
 
   const sendMessage = async () => {
     if (message.trim() && props.role === 'business') {
+      console.log(`sending to chatId ${chatId}`);
       socket.emit('business chat message', {
         chatId: chatId,
         businessId: businessId,
@@ -91,6 +130,7 @@ const Chat = (props) => {
         message: message});
       setMessage('');
     } else if (message.trim() && props.role === 'client') {
+      // console.log(`sending to chatId ${chatId}`);
       console.log(chatId)
       socket.emit('client chat message', {
         chatId: chatId,
@@ -101,7 +141,8 @@ const Chat = (props) => {
       setMessage('');
     }
       try {
-      let result = await axios.get(`http://localhost:3000/chats/${props.chatId}`);
+        console.log("Sending message to chatId", chatId);
+      let result = await axios.get(`http://localhost:3000/chats/${chatId}`);
       setChat(result.data);
     } catch (err) {
       console.log(err)

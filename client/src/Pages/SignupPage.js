@@ -29,7 +29,7 @@ function SignupPage() {
       password: Yup.string()
         .min(5, "Password must be at least 5 characters long")
         .matches(/[0-9]/, "Password must contain at least 1 numerical character")
-        .matches(/[!@#$%^&*-_=+]/, "Password must contain at least 1 symbolic character")
+        .matches(/^[!@#$%^&*\-_=+]/, "Password must contain at least 1 symbolic character")
         .required("Password is required"),
       confirmPassword: Yup.string()
         .oneOf([Yup.ref('password'), null], "Passwords must match")
@@ -111,7 +111,7 @@ function SignupPage() {
           <ul className="password-requirements">
             <li className={formik.values.password.length >= 5 ? 'valid' : 'invalid'}>Password must be at least 5 characters long.</li>
             <li className={/[0-9]/.test(formik.values.password) ? 'valid' : 'invalid'}>Password must contain at least 1 numerical character.</li>
-            <li className={/[!@#$%^&*-_=+]/.test(formik.values.password) ? 'valid' : 'invalid'}>Password must contain at least 1 symbolic character.</li>
+            <li className={/^[!@#$%^&*\-_=+]/.test(formik.values.password) ? 'valid' : 'invalid'}>Password must contain at least 1 symbolic character.</li>
           </ul>
         </div>
         <div className="form-group">

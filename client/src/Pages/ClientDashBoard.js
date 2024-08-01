@@ -47,6 +47,7 @@ function ClientDashboard() {
         // fetch all followed companies
         await axios.get(`http://localhost:3000/clientdashboard/${user.id}`)
         .then((res) => {
+          console.log("res from fetch followed companies", res.data);
           let followedbusiness = res.data[0];
           // based on the response, fetch the chats
           if (res.data[0] === "No followed businesses") {
@@ -57,23 +58,23 @@ function ClientDashboard() {
           let newSocket = io.connect('http://localhost:3000');
           (async () => {
             try {
+              // fetching messages in each chat
               let chats = await axios.post(`http://localhost:3000/chats/${user.id}`, {role: "client"});
-              // console.log(chats.data);
+              console.log(chats.data);
               setChatMessages(chats.data);
               chats.data.forEach((chat) => {
                 newSocket.emit('join', { businessId: chat.businessId, clientId: user.id });
               });
-              let merge = res.data[0].map((business) => {
-                let eachBuesiness = chats.data.map((chat) => {
-                  if (business.businessId === chat.businessId) {
-                    // console.log({...business, chatId: chat.id});
-                    return {...business, chatId: chat.id};
-                  } else {
-                    return business;
-                  }
-                });
-                // console.log(eachBuesiness)
-                return eachBuesiness;
+              let merge = [];
+              console.log(res.data[0]);
+              res.data[0].forEach((business) => {
+                let targetChat = chats.data.find((chat) => business.businessId === chat.businessId);
+                console.log(targetChat)
+                business.chatId = targetChat.id;
+                
+                console.log(business)
+                merge.push(business);
+                return business;
               });
               console.log(merge);
               setFollowedbusiness(merge)
@@ -160,12 +161,33 @@ function ClientDashboard() {
     })
   }, []);
 
-  const handleFollow = (companyId) => {
+  const handleFollow = async (companyId) => {
     console.log("Follow company with ID:", companyId);
-  };
+    await axios.post(`http://localhost:3000/clientdashboard/${user.id}`, {action: "follow business", businessId: companyId})
+    .then((res) => {
+      if (res.data.result === "success") {
+        console.log(res.data.message);
+        // window.location.reload();
+      }
+    })
+    .then(async () => {
+      // fetch id chat exists
+      await axios.post(`http://localhost:3000/chats/`, {businessId: companyId, clientId: user.id})
+      .then(async (res) => { 
+        console.log("fetched chat result from following a business ", res.data);
+        if (res.data.message === "No chatId found") {
+          // make new chat room in database
+          await axios.post(`http://localhost:3000/chats/`, {action: "create new chat" ,businessId: companyId, clientId: user.id})
+        }
+      })
+    });
+    window.location.reload();
+  }
 
   const handleOpenChatModal = (e) => {
+    console.log(e.chatId);
     if (!e.chatId) {
+      
       setChatRoomId(-1);
     } else {
       setChatRoomId(e.chatId);
@@ -184,14 +206,22 @@ function ClientDashboard() {
 
 
 
-  const handleUnfollow = (companyId) => {
+  const handleUnfollow = async (companyId) => {
     console.log("Unfollow company with ID:", companyId);
     // Add logic to handle unfollow action, such as updating state
-    setUser((prevUser) => ({
-      ...prevUser,
-      followedCompanies: prevUser.followedCompanies.filter(id => id !== companyId),
-    }));
+    // setUser((prevUser) => ({
+    //   ...prevUser,
+    //   followedCompanies: prevUser.followedCompanies.filter(id => id !== companyId),
+    // }));
+    await axios.post(`http://localhost:3000/clientdashboard/${user.id}`, {action: "unfollow business", businessId: companyId})
+    .then((res) => {
+      if (res.data.result === "success") {
+        console.log(res.data.message);
+        window.location.reload();
+      }
+    })
   };
+  console.log(followedbusiness)
   return (
     <Container className="client-dashboard mt-4">
        <div>

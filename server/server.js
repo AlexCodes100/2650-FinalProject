@@ -1,7 +1,7 @@
 import "dotenv/config.js";
 import createError from "http-errors";
 import express from "express";
-import path from "path";
+import path, { parse } from "path";
 import cookieParser from "cookie-parser";
 import logger from "morgan";
 import indexRouter from "./routes/index.js";
@@ -119,6 +119,7 @@ async function startServer() {
         credentials: true,
       },
     });
+    // Chat rooms
     const rooms = new Map()
 
     io.on('connection', (socket) => {
@@ -138,28 +139,33 @@ async function startServer() {
         socket.roomId = room;
         socket.clientId = clientId;
         socket.businessId = businessId;
+        //  set the room in the rooms map
         rooms.set(room, {clientId, businessId});
         console.log(`Client ${clientId} joined room for business ${businessId}`);
+        //  check if chat room exists
         await pool.query(` SELECT id FROM chats WHERE businessId = ? AND clientId = ?`, [businessId, clientId])
         .then(async (res) => {
-          // console.log(res);
-          if (res[0].length === 0) {
-            console.log("No chat found for this user");
-            await pool.query('INSERT INTO chats (businessId, clientId) VALUES (?, ?)', [businessId, clientId])
-            .then(async()=> {
-              await pool.query(` SELECT id FROM chats WHERE businessId = ? AND clientId = ?`, [businessId, clientId])
-            })
-          } else {
-            console.log(res[0][0].id);
-            socket.emit('chatId', res[0][0].id);
-          }
+          // if chat room does not exist, create a new chat room
+          // if (res[0].length === 0) {
+          //   console.log("No chat found for this user");
+          //   await pool.query('INSERT INTO chats (businessId, clientId) VALUES (?, ?)', [businessId, clientId])
+          //   .then(async()=> {
+          //     // get the chatId of the newly created chat room
+          //     await pool.query(` SELECT id FROM chats WHERE businessId = ? AND clientId = ?`, [businessId, clientId])
+          //   })
+          // } else {
+          //   console.log(res[0][0].id);
+          //   socket.emit('chatId', res[0][0].id);
+          // }
         })
       });
       // Client sends a message
       socket.on('client chat message', async (msg) => {
-        const { chatId, businessId, clientId, message } = msg;
+        let { chatId, businessId, clientId, message } = msg;
+        console.log(chatId, "chatId sent by client");
         const room = `business_${businessId}_client_${clientId}`;
-
+        chatId = parseInt(chatId, 10);
+        console.log(chatId, "chatId sent by client");
         console.log(`message: ${message} in room: ${room}`);
 
         // Store the message in the database
@@ -175,7 +181,7 @@ async function startServer() {
         const room = `business_${businessId}_client_${clientId}`;
 
         console.log(`message: ${message} in room: ${room}`);
-
+        // chatId = parseInt(chatId, 10);
         // Store the message in the database
         await pool.query('INSERT INTO messages ( chatId, senderId, senderRole, message) VALUES (?, ?, ?, ?)', [chatId, businessId, "business", message]);
 

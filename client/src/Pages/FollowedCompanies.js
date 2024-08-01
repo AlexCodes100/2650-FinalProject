@@ -2,15 +2,16 @@ import {useEffect, useState} from 'react';
 import { Card, ListGroup, Button } from 'react-bootstrap';
 
 function FollowedCompanies(props) {
-  const [companies, setCompanies] = useState(props.companies[0]);
+  const [companies, setCompanies] = useState(props.companies);
 
   useEffect(() => {
-    // console.log('companies:', props.companies[0]);
+    console.log('companies:', props.companies);
   }, [companies]);
   return (
     <Card>
       <ListGroup variant="flush">
-      {companies.map((company) => {
+      {companies.map((companyfetched) => {
+        let company = companyfetched;
         // console.log(company)
         return (
           <ListGroup.Item key={company.businessId}>

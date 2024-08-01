@@ -3,6 +3,7 @@ import pool from "../config/sqlDB.js";
 import bcrypt from "bcrypt";
 import "dotenv/config.js";
 import { parse } from "path";
+import { type } from "os";
 
 const router = express.Router();
 
@@ -30,6 +31,7 @@ async function fetchChats(id, role) {
       LEFT JOIN messages m 
       ON c.id = m.chatId AND m.createDate = lastest.latestMessage LEFT JOIN business b ON c.businessId = b.id 
       WHERE c.clientId = ?`, [id]);
+    console.log(result); 
   }  
     // console.log(result);
   } catch (err) {
@@ -74,7 +76,9 @@ async function getChatMessages(chatroomId) {
   }
 }
 router.get("/:chatId", async (req, res) => {
+  console.log("fetching chat messages with chatId", req.params.chatId);
   const chatId = parseInt(req.params.chatId, 10);
+  console.log(chatId, typeof(chatId));
   const chat = await getChatMessages(chatId);
   // console.log(chat);
   if (!chat) {
@@ -93,7 +97,7 @@ async function fetchChatId(businessId, clientId) {
   
   try {
     const result = await pool.query(query, [businessId, clientId]);
-    // console.log(result[0]);
+    console.log("found chatId: ", result[0]);
     return result[0];
   } catch (error) {
     console.error('Error creating chat:', error);
@@ -101,10 +105,37 @@ async function fetchChatId(businessId, clientId) {
   }
 }
 router.post("/", async (req, res) => {
+  
   const { businessId, clientId } = req.body;
-  const chatId = await fetchChatId(businessId, clientId);
-  // console.log(chatId);
-  res.status(200).send(chatId);
+  console.log("business and client id send to server for finding chatid",businessId, clientId);
+  if (req.body.action === "create new chat") {
+    try {
+      await pool.query('INSERT INTO chats (businessId, clientId) VALUES (?, ?)', [businessId, clientId]);
+      const result = await fetchChatId(businessId, clientId);
+      console.log("fetchedChatId: ",result);
+      res.status(200).send(result);
+    } catch (error) {
+      console.error('Error creating chat:', error);
+      res.status(500).json({ error: 'Failed to create chat' });
+    }
+  }
+  try {
+    let result;
+  const chatId = await fetchChatId(businessId, clientId)
+  .then((res) => {
+    console.log(res)
+    
+    if (res.length === 0) {
+      result = {message: "No chatId found"}
+    } else {
+      result = res;
+    }
+  });
+  res.status(200).send(result)
+  } catch (error) {
+    console.log("error fetching chatId ", error)
+  }
+  
 });
 
 export default router;

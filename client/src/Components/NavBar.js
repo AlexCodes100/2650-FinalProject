@@ -8,11 +8,12 @@ function NavBar() {
   const [loggedIn, setLoggedIn] = useState(false);
   const [user, setUser] = useState(null);
   const navigate = useNavigate();
+  const apiUrl = process.env.REACT_APP_API_URL;
 
   useEffect(() => {
     const token = localStorage.getItem('authToken');
     if (token) {
-      axios.get('http://localhost:3000/auth/user', {
+      axios.get(`${apiUrl}/auth/user`, {
         headers: { Authorization: `Bearer ${token}` }
       })
       .then(response => {

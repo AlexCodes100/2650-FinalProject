@@ -9,6 +9,7 @@ import NavBar from "../Components/NavBar";
 function SignupPage() {
   const navigate = useNavigate();
   const [registrationError, setRegistrationError] = useState("");
+  const apiUrl = process.env.REACT_APP_API_URL;
 
   const formik = useFormik({
     initialValues: {
@@ -29,7 +30,7 @@ function SignupPage() {
       password: Yup.string()
         .min(5, "Password must be at least 5 characters long")
         .matches(/[0-9]/, "Password must contain at least 1 numerical character")
-        .matches(/[!@#$%^&*-_=+]/, "Password must contain at least 1 symbolic character")
+        .matches(/^[!@#$%^&*\-_=+]/, "Password must contain at least 1 symbolic character")
         .required("Password is required"),
       confirmPassword: Yup.string()
         .oneOf([Yup.ref('password'), null], "Passwords must match")
@@ -42,7 +43,7 @@ function SignupPage() {
     onSubmit: async (values) => {
       try {
         setRegistrationError(""); // Clear previous errors
-        await axios.post("http://localhost:3000/register", values);
+        await axios.post(`${apiUrl}/register`, values);
         alert("Registration successful");
         navigate("/loginSelection"); // Redirect to login page
       } catch (error) {
@@ -111,7 +112,7 @@ function SignupPage() {
           <ul className="password-requirements">
             <li className={formik.values.password.length >= 5 ? 'valid' : 'invalid'}>Password must be at least 5 characters long.</li>
             <li className={/[0-9]/.test(formik.values.password) ? 'valid' : 'invalid'}>Password must contain at least 1 numerical character.</li>
-            <li className={/[!@#$%^&*-_=+]/.test(formik.values.password) ? 'valid' : 'invalid'}>Password must contain at least 1 symbolic character.</li>
+            <li className={/^[!@#$%^&*\-_=+]/.test(formik.values.password) ? 'valid' : 'invalid'}>Password must contain at least 1 symbolic character.</li>
           </ul>
         </div>
         <div className="form-group">
@@ -139,6 +140,7 @@ function SignupPage() {
           >
             <option value="">Select a language</option>
             <option value="English">English</option>
+            <option value="french">French</option>
             <option value="Spanish">Spanish</option>
             <option value="Chinese Traditional">Chinese Traditional</option>
             <option value="Japanese">Japanese</option>

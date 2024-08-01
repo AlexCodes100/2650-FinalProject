@@ -1,16 +1,22 @@
 import React, { useContext, useEffect, useState } from "react";
+// components
 import RecommendedCompanies from "./RecommendedCompanies";
 import FollowedCompanies from "./FollowedCompanies";
 import Posts from "./Posts";
+import UserProfile from "./UserProfile";
+// chat component
+import Chat from "../Components/Chat";
+import io from 'socket.io-client';
 import axios from "axios";
 import { Container, Row, Col, Card, Button, Modal } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import UserProfile from "./UserProfile";
-import Chat from "../Components/Chat";
+
 
 function ClientDashboard() {
   const [showModal, setShowModal] = useState(false);
+  const apiUrl = process.env.REACT_APP_API_URL;
   const [user, setUser] = useState({
+    // delete soon once we have the user data from login
     id: '1',
     firstName: 'xavier',
     lastName: 'P',
@@ -24,118 +30,199 @@ function ClientDashboard() {
       { id: 2, name: "FashionHub" },
       { id: 3, name: "GlobalSolutions" }
     ]
-   
   });
   const handleOpenModal = () => setShowModal(true);
   const handleCloseModal = () => setShowModal(false);
-
-  const followedCompanies = user.followedCompanies;
-  // const { user, followedCompanies } = useContext(UserContext);
+  const [followedbusiness, setFollowedbusiness] = useState([]);
   const [posts, setPosts] = useState([]);
   const [recommendedBusinesses, setRecommendedBusinesses] = useState([]);
+  const [chatMessages, setChatMessages] = useState([]);
+  const [showChatModal, setShowChatModal] = useState(false);
+  const [chatRoomId, setChatRoomId] = useState('');
+  const [businessId, setBusinessId] = useState('');
+  const [chatRoomBusiness, setChatRoomBusiness] = useState('');
+  
 
-  // Fake posts data
-  const fakePosts = [
-    {
-      id: 1,
-      title: "New Product Launch",
-      business_name: "TechCorp",
-      content: "We're excited to announce our latest innovation! Stay tuned for more details.",
-      created_at: "2024-07-15T10:00:00Z"
-    },
-    {
-      id: 2,
-      title: "Summer Sale",
-      business_name: "FashionHub",
-      content: "Get up to 50% off on all summer collections. Limited time offer!",
-      created_at: "2024-07-16T14:30:00Z"
-    },
-    {
-      id: 3,
-      title: "Job Openings",
-      business_name: "GlobalSolutions",
-      content: "We're hiring! Check out our careers page for exciting opportunities.",
-      created_at: "2024-07-17T09:15:00Z"
-    },
-    {
-      id: 4,
-      title: "Community Event",
-      business_name: "LocalCafe",
-      content: "Join us this weekend for our annual charity bake sale. All proceeds go to local charities.",
-      created_at: "2024-07-18T11:45:00Z"
-    },
-    {
-      id: 5,
-      title: "Tech Workshop",
-      business_name: "CodeAcademy",
-      content: "Free coding workshop this Saturday. Learn the basics of web development!",
-      created_at: "2024-07-19T13:00:00Z"
+  const fetchFollowedCompanies = async () => {
+      try {
+        // fetch all followed companies
+        await axios.get(`${apiUrl}/clientdashboard/${user.id}`)
+        .then((res) => {
+          console.log("res from fetch followed companies", res.data);
+          let followedbusiness = res.data[0];
+          // based on the response, fetch the chats
+          if (res.data[0] === "No followed businesses") {
+            console.log(res.data[0]);
+            return;
+          }
+          // console.log(res.data[0])
+          let newSocket = io.connect(`${apiUrl}`);
+          (async () => {
+            try {
+              // fetching messages in each chat
+              let chats = await axios.post(`${apiUrl}/chats/${user.id}`, {role: "client"});
+              console.log(chats.data);
+              setChatMessages(chats.data);
+              chats.data.forEach((chat) => {
+                newSocket.emit('join', { businessId: chat.businessId, clientId: user.id });
+              });
+              let merge = [];
+              console.log(res.data[0]);
+              res.data[0].forEach((business) => {
+                let targetChat = chats.data.find((chat) => business.businessId === chat.businessId);
+                console.log(targetChat)
+                business.chatId = targetChat.id;
+                
+                console.log(business)
+                merge.push(business);
+                return business;
+              });
+              console.log(merge);
+              setFollowedbusiness(merge)
+            } catch (error) {
+              console.error("Failed to fetch chats:", error);
+            }
+          })();
+          return followedbusiness;
+        })
+        .then((res) => {
+          // fetch followed companies' posts
+          fetchFollowedCompaniesPosts(res)
+          return res;
+        })
+        .then((res) => {
+          // console.log(res);
+          // fetch recommended companies
+          fetchRecommendedCompanies(res)
+        });
+        // if (result.data[0] !== "No followed businesses") {
+        //   console.log(result.data[0]);
+        //   setFollowedbusiness(result.data[0]);
+        // } else {
+        //   console.log(result.data[0]);
+        //   setFollowedbusiness([]);
+        //     return [];
+        // }
+      } catch (error) {
+        console.error("Failed to fetch businesses:", error);
+      }
+    };
+
+  const fetchFollowedCompaniesPosts = async (followedbusinesses) => {
+    // console.log(followedbusinesses);
+    try {
+      let request = followedbusinesses.map((business) => {
+        // console.log(business.businessId);
+        return business.businessId
+      });
+      // console.log(request);
+      let result = await axios.post(`${apiUrl}/clientdashboard/`,{action:"fetch posts",followedbusiness: request});
+      setPosts(result.data);
     }
-  ];
+    catch (error) {
+      console.error("Failed to fetch posts:", error);
+    }
+  };
 
-  // useEffect(() => {
-  //   const fetchData = async () => {
-  //     //fetch recommended companies
-  //     try {
-  //       // check the followed companies and find 3 that is not followed
-  //       let result = await axios.post(
-  //         `http://localhost:4000/clientdashboard/`,
-  //         {
-  //           followedCompanies: followedCompanies,
-  //         }
-  //       );
-  //       if (result.data[0].result === "successful") {
-  //         console.log(result.data[0].message);
-  //         setRecommendedBusinesses(result.data);
-  //       } else {
-  //         console.log(result.data[0].message);
-  //       }
-  //     } catch (error) {
-  //       console.error("Failed to fetch businesses:", error);
-  //     }
-      useEffect(() => {
-        // Simulating API calls
-        setRecommendedBusinesses([
-          { id: 7, businessName: "TechStart", businessType: "Technology" },
-          { id: 8, businessName: "GreenEnergy", businessType: "Renewable Energy" },
-          { id: 9, businessName: "HealthPlus", businessType: "Healthcare" },
-        ]);
-        setPosts(fakePosts);
+  const fetchRecommendedCompanies = async (followedBusinesses) => {
+    try {
+      let request = followedBusinesses.map((business) => {
+        // console.log(business.businessId);
+        return business.businessId
+      });
+      // console.log(request);
+      const result = await axios.post(`${apiUrl}/clientdashboard/`, {action:"fetch recommended businesses",followedbusiness: request});
+      if (result.data[0] !== "No recommended businesses") {
+        // console.log(result.data);
+        setRecommendedBusinesses(result.data);
+      } else {
+        console.log(result.data);
+        setRecommendedBusinesses([]);
+      }
+    } catch (error) {
+      console.error("Failed to fetch businesses:", error);
+    }
+  }
+
+  useEffect(() => {
+    // fetch followed companies
+    fetchFollowedCompanies();
+
+    const newSocket = io.connect(`${apiUrl}`);
+    let chats =[{}];
+    newSocket.on('chat message', async (msg) => {
+      chats = await axios.post(`${apiUrl}/chats/${user.id}`, {role: "client"});
+      setChatMessages(chats.data);
+      if (msg.senderRole === "business") {
+        console.log("Received message from business:", msg);
+      }else {
+        // make the css notice the new message
+        
+      }
+    })
   }, []);
-      //! this part as been commented to test the fake post 
-      // fetch followed companies' posts
-      // try {
-      //   const response = await axios.get(
-      //     `http://localhost:4000/clientdashboard/${user.id}`
-      //   );
-      //   setPosts(response.data);
-      // } catch (err) {
-      //   console.error("Error fetching followed posts:", err);
-      //   setPosts("Failed to fetch posts. Please try again later.");
-      // }
-  //     setPosts(fakePosts);
-  //   };
-  //   fetchData();
-  // }, []);
 
-  const handleFollow = (companyId) => {
+  const handleFollow = async (companyId) => {
     console.log("Follow company with ID:", companyId);
-    // Add logic to handle follow action
-  };
+    await axios.post(`${apiUrl}/clientdashboard/${user.id}`, {action: "follow business", businessId: companyId})
+    .then((res) => {
+      if (res.data.result === "success") {
+        console.log(res.data.message);
+        // window.location.reload();
+      }
+    })
+    .then(async () => {
+      // fetch id chat exists
+      await axios.post(`${apiUrl}/chats/`, {businessId: companyId, clientId: user.id})
+      .then(async (res) => { 
+        console.log("fetched chat result from following a business ", res.data);
+        if (res.data.message === "No chatId found") {
+          // make new chat room in database
+          await axios.post(`${apiUrl}/chats/`, {action: "create new chat" ,businessId: companyId, clientId: user.id})
+        }
+      })
+    });
+    window.location.reload();
+  }
 
-  const handleChat = (companyId) => {
-    console.log("Chat with company with ID:", companyId);
-    // Add logic to handle chat action
+  const handleOpenChatModal = (e) => {
+    console.log(e.chatId);
+    if (!e.chatId) {
+      
+      setChatRoomId(-1);
+    } else {
+      setChatRoomId(e.chatId);
+    }
+    console.log(e);
+    setBusinessId(e.businessId);
+    setChatRoomBusiness(e.businessName);
+    setShowChatModal(true)
   };
+  const handleCloseChatModal = () => setShowChatModal(false);
 
-  const handleUnfollow = (companyId) => {
+  // const handleChat = (companyId) => {
+  //   console.log("Chat with company with ID:", companyId);
+  //   // Add logic to handle chat action
+  // };
+
+
+
+  const handleUnfollow = async (companyId) => {
     console.log("Unfollow company with ID:", companyId);
     // Add logic to handle unfollow action, such as updating state
-    setUser((prevUser) => ({
-      ...prevUser,
-      followedCompanies: prevUser.followedCompanies.filter(id => id !== companyId),
-    }));
+    // setUser((prevUser) => ({
+    //   ...prevUser,
+    //   followedCompanies: prevUser.followedCompanies.filter(id => id !== companyId),
+    // }));
+    await axios.post(`${apiUrl}/clientdashboard/${user.id}`, {action: "unfollow business", businessId: companyId})
+    .then((res) => {
+      if (res.data.result === "success") {
+        console.log(res.data.message);
+        window.location.reload();
+      }
+    })
   };
+  console.log(followedbusiness)
   return (
     <Container className="client-dashboard mt-4">
        <div>
@@ -159,7 +246,7 @@ function ClientDashboard() {
         </Modal.Footer>
       </Modal>
     </div>
-    <Chat />
+    {/* <Chat /> */}
 <Card style={{ fontWeight: 'bold',backgroundColor: 'rgba(255, 228, 225, 0.5)', border: 'none', padding: '20px' }}>
         {/* <Card style={{ fontWeight: 'bold',backgroundColor: '#FFE4C4', border: 'none', padding: '20px' }}> */}
           <section className="text-center my-5">
@@ -168,18 +255,25 @@ function ClientDashboard() {
         </Card>
     <Row>
       <Col md={8}>
-        <Posts posts={posts} />
+        <Posts 
+        posts={posts}
+        role="client" 
+      />
       </Col>
       <Col md={4}>
         <Card className="mb-4 mt-5">
-          <Card.Body>
-            <Card.Title>Followed Companies</Card.Title>
-            <FollowedCompanies 
-            companies={followedCompanies} 
-            onUnfollow={handleUnfollow}
-            onFollow={handleFollow}
-            />
-          </Card.Body>
+          {followedbusiness[0]?
+            <Card.Body>
+              <Card.Title>Followed Companies</Card.Title>
+              <FollowedCompanies 
+              companies={followedbusiness}
+              onUnfollow={handleUnfollow}
+              onFollow={handleFollow}
+              onChat={handleOpenChatModal}
+              />
+            </Card.Body>:
+            <p>No followed Business</p>
+          }
         </Card>
         <Card>
           <Card.Body>
@@ -187,9 +281,25 @@ function ClientDashboard() {
             <RecommendedCompanies 
               companies={recommendedBusinesses}
               onFollow={handleFollow}
-              onChat={handleChat} />
+              onChat={handleOpenChatModal}
+              chatId={chatRoomId} // usestate
+              clientId={user.id}
+              role= "client"
+              chatRoomBusiness={chatRoomBusiness} // usestate
+              showChatModal={showChatModal}
+              handleCloseChatModal={handleCloseChatModal}
+            />
           </Card.Body>
         </Card>
+        {showChatModal? 
+          <Chat 
+          chatId={chatRoomId} // usestate
+          businessId = {businessId} // usestate
+          clientId={user.id}
+          role= "client"
+          chatRoomBusiness={chatRoomBusiness} // usestate
+          showChatModal={showChatModal}
+          handleCloseChatModal={handleCloseChatModal} />: null}
       </Col>
     </Row>
   </Container>

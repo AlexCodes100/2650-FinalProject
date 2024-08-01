@@ -1,0 +1,70 @@
+version: '3.8'
+
+services:
+  client:
+    build:
+      context: ./client
+    image: alexcodes100/2650-finalproject:latest
+    ports:
+      - "4000:4000"
+    environment:
+      - REACT_APP_API_URL=http://server:3000
+    depends_on:
+      - server
+    networks:
+      - app-network
+
+  server:
+    build:
+      context: ./server
+    image: alexcodes100/2650-finalproject:latest
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
+      - SESSION_SECRET=${SESSION_SECRET}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - SQL_HOST=mysql
+      - SQL_USER=root
+      - SQL_PASSWORD=root
+      - SQL_DATABASE=db
+      - CORS_ORIGIN=http://client:4000
+      - JWT_SECRET=${JWT_SECRET}
+      - CLIENT_HOST=http://client:4000
+      - SERVER_HOST=http://server:3000
+    depends_on:
+      - mysql
+      - redis
+    networks:
+      - app-network
+
+  mysql:
+    build:
+      context: ./mysql
+    image: alexcodes100/2650-finalproject:latest
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: mydatabase
+    networks:
+      - app-network
+
+  redis:
+    build:
+      context: ./redis
+    image: alexcodes100/2650-finalproject:latest
+    ports:
+      - "6379:6379"
+    environment:
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge

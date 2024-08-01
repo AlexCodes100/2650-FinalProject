@@ -2,13 +2,15 @@ import { useEffect, useState } from "react";
 import { Card, Container, Row, Col } from 'react-bootstrap';
 import axios from "axios";
 
-function UserProfile({ user }) {
+function UserProfile(props) {
+  const [user, setUser] = useState({});
   const [updatingUser, setUpdatingUser] = useState(user)
   const [updating, setUpdating] = useState(false);
   const [error, setError] = useState(false);
+  const apiUrl = process.env.REACT_APP_API_URL;
 
   useEffect(() => {
-    setUpdatingUser(user);
+    setUser(props.user);
   },[])
   // Event Handler
   const inputChangeHandler = (e) => {
@@ -20,6 +22,7 @@ function UserProfile({ user }) {
   };
   const changeClientProfile = () => {
     setUpdating(true);
+    setUpdatingUser(user);
   }
   const cancelChangeClientProfile = () => {
     setUpdating(false);
@@ -35,7 +38,7 @@ function UserProfile({ user }) {
     updatedProfile.preferredLanguage = updatingUser.preferredLanguage;
 
     try {
-      let result = await axios.put(`http://localhost:3000/clientdashboard/${user.id}`, {updatedProfile});
+      let result = await axios.put(`${apiUrl}/clientdashboard/${user.id}`, {updatedProfile});
       console.log(result)
       if (result.data[0].result === "successful") {
         console.log(result.data[0].message)
@@ -70,7 +73,7 @@ function UserProfile({ user }) {
           type="text"
           id="firstName"
           name="firstName"
-          value={updatingUser.businessType || ""}
+          value={updatingUser.firstName || ""}
           onChange={inputChangeHandler}
         />
       </div>
@@ -80,7 +83,7 @@ function UserProfile({ user }) {
           type="text"
           id="lastName"
           name="lastName"
-          value={updatingUser.businessLocation || ""}
+          value={updatingUser.lastName || ""}
           onChange={inputChangeHandler}
         />
       </div>
@@ -89,11 +92,12 @@ function UserProfile({ user }) {
         <select
           id="preferredLanguage"
           name="preferredLanguage"
-          value={updatingUser.preferredLanguage || ""}
+          defaultValue={updatingUser.preferredLanguage}
           onChange={inputChangeHandler}
         >
           <option value="">Select a language</option>
           <option value="English">English</option>
+          <option value="French">French</option>
           <option value="Spanish">Spanish</option>
           <option value="Chinese Traditional">Chinese Traditional</option>
           <option value="Japanese">Japanese</option>

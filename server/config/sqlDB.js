@@ -45,6 +45,16 @@ async function initializeTables(pool) {
 );
   `;
 
+  const createFollowedBusinessesTableQuery = `
+  CREATE TABLE IF NOT EXISTS followedBusinesses (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    userId INT NOT NULL,
+    businessId INT NOT NULL,
+    FOREIGN KEY (userId) REFERENCES users(id),
+    FOREIGN KEY (businessId) REFERENCES business(id)
+  );
+`;
+
   const createBusinessPostsTableQuery = `
   CREATE TABLE IF NOT EXISTS businessPosts (
     postId INT AUTO_INCREMENT PRIMARY KEY,
@@ -100,6 +110,7 @@ async function initializeTables(pool) {
   try {
     await connection.query(createUserTableQuery);
     await connection.query(createBusinessTableQuery);
+    await connection.query(createFollowedBusinessesTableQuery);
     await connection.query(createBusinessPostsTableQuery);
     await connection.query(createPostCommentsTableQuery);
     await connection.query(createLikesTableQuery);

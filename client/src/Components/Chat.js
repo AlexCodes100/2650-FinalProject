@@ -28,7 +28,7 @@ const Chat = (props) => {
   async function fetchChatId(businessId,clientId){
     let id;
     try{
-      id = await axios.post(`http://localhost:3000/chats`,
+      id = await axios.post(`${apiUrl}/chats`,
         {
           businessId:businessId,
           clientId: clientId
@@ -43,7 +43,7 @@ const Chat = (props) => {
           return res;
         }).then(async (res) => {
           console.log("fetching chat");
-          let result = await axios.get(`http://localhost:3000/chats/${res.data[0].id}`);
+          let result = await axios.get(`${apiUrl}/chats/${res.data[0].id}`);
           setChat(result.data);
           return res;
         });
@@ -59,7 +59,7 @@ const Chat = (props) => {
     setBusinessId(props.businessId)
     setClientId(props.clientId)
     // create a socket connection
-    let socket = io.connect('http://localhost:3000');
+    let socket = io.connect('${apiUrl}');
     setSocket(socket);
     // join the chat room
     socket.emit('join',{businessId:props.businessId,clientId:props.clientId});
@@ -81,7 +81,7 @@ const Chat = (props) => {
         if (tempChatId) {
           console.log('temp chatId:', tempChatId);
           try {
-            let result = await axios.get(`http://localhost:3000/chats/${tempChatId}`);
+            let result = await axios.get(`${apiUrl}/chats/${tempChatId}`);
             setChat(result.data);
           } catch (err) {
             console.log(err)
@@ -89,14 +89,14 @@ const Chat = (props) => {
         } else {
           console.log('original chatId:', chatId);
           try {
-            let result = await axios.get(`http://localhost:3000/chats/${chatId}`);
+            let result = await axios.get(`${apiUrl}/chats/${chatId}`);
             setChat(result.data);
           } catch (err) {
             console.log(err)
           }
         }
       //   try {
-      //   let result = await axios.get(`http://localhost:3000/chats/${tempChatId}`);
+      //   let result = await axios.get(`${apiUrl}/chats/${tempChatId}`);
       //   setChat(result.data);
       // } catch (err) {
       //   console.log(err)

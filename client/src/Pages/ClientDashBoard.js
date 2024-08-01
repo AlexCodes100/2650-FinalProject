@@ -46,7 +46,7 @@ function ClientDashboard() {
   const fetchFollowedCompanies = async () => {
       try {
         // fetch all followed companies
-        await axios.get(`http://localhost:3000/clientdashboard/${user.id}`)
+        await axios.get(`${apiUrl}/clientdashboard/${user.id}`)
         .then((res) => {
           console.log("res from fetch followed companies", res.data);
           let followedbusiness = res.data[0];
@@ -56,11 +56,11 @@ function ClientDashboard() {
             return;
           }
           // console.log(res.data[0])
-          let newSocket = io.connect('http://localhost:3000');
+          let newSocket = io.connect(`${apiUrl}`);
           (async () => {
             try {
               // fetching messages in each chat
-              let chats = await axios.post(`http://localhost:3000/chats/${user.id}`, {role: "client"});
+              let chats = await axios.post(`${apiUrl}/chats/${user.id}`, {role: "client"});
               console.log(chats.data);
               setChatMessages(chats.data);
               chats.data.forEach((chat) => {
@@ -116,7 +116,7 @@ function ClientDashboard() {
         return business.businessId
       });
       // console.log(request);
-      let result = await axios.post(`http://localhost:3000/clientdashboard/`,{action:"fetch posts",followedbusiness: request});
+      let result = await axios.post(`${apiUrl}/clientdashboard/`,{action:"fetch posts",followedbusiness: request});
       setPosts(result.data);
     }
     catch (error) {
@@ -131,7 +131,7 @@ function ClientDashboard() {
         return business.businessId
       });
       // console.log(request);
-      const result = await axios.post(`http://localhost:3000/clientdashboard/`, {action:"fetch recommended businesses",followedbusiness: request});
+      const result = await axios.post(`${apiUrl}/clientdashboard/`, {action:"fetch recommended businesses",followedbusiness: request});
       if (result.data[0] !== "No recommended businesses") {
         // console.log(result.data);
         setRecommendedBusinesses(result.data);
@@ -148,10 +148,10 @@ function ClientDashboard() {
     // fetch followed companies
     fetchFollowedCompanies();
 
-    const newSocket = io.connect('http://localhost:3000');
+    const newSocket = io.connect(`${apiUrl}`);
     let chats =[{}];
     newSocket.on('chat message', async (msg) => {
-      chats = await axios.post(`http://localhost:3000/chats/${user.id}`, {role: "client"});
+      chats = await axios.post(`${apiUrl}/chats/${user.id}`, {role: "client"});
       setChatMessages(chats.data);
       if (msg.senderRole === "business") {
         console.log("Received message from business:", msg);
@@ -164,7 +164,7 @@ function ClientDashboard() {
 
   const handleFollow = async (companyId) => {
     console.log("Follow company with ID:", companyId);
-    await axios.post(`http://localhost:3000/clientdashboard/${user.id}`, {action: "follow business", businessId: companyId})
+    await axios.post(`${apiUrl}/clientdashboard/${user.id}`, {action: "follow business", businessId: companyId})
     .then((res) => {
       if (res.data.result === "success") {
         console.log(res.data.message);
@@ -173,12 +173,12 @@ function ClientDashboard() {
     })
     .then(async () => {
       // fetch id chat exists
-      await axios.post(`http://localhost:3000/chats/`, {businessId: companyId, clientId: user.id})
+      await axios.post(`${apiUrl}/chats/`, {businessId: companyId, clientId: user.id})
       .then(async (res) => { 
         console.log("fetched chat result from following a business ", res.data);
         if (res.data.message === "No chatId found") {
           // make new chat room in database
-          await axios.post(`http://localhost:3000/chats/`, {action: "create new chat" ,businessId: companyId, clientId: user.id})
+          await axios.post(`${apiUrl}/chats/`, {action: "create new chat" ,businessId: companyId, clientId: user.id})
         }
       })
     });
@@ -214,7 +214,7 @@ function ClientDashboard() {
     //   ...prevUser,
     //   followedCompanies: prevUser.followedCompanies.filter(id => id !== companyId),
     // }));
-    await axios.post(`http://localhost:3000/clientdashboard/${user.id}`, {action: "unfollow business", businessId: companyId})
+    await axios.post(`${apiUrl}/clientdashboard/${user.id}`, {action: "unfollow business", businessId: companyId})
     .then((res) => {
       if (res.data.result === "success") {
         console.log(res.data.message);

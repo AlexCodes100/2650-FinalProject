@@ -59,7 +59,7 @@ const Chat = (props) => {
     setBusinessId(props.businessId)
     setClientId(props.clientId)
     // create a socket connection
-    let socket = io.connect('${apiUrl}');
+    let socket = io.connect(`${apiUrl}`);
     setSocket(socket);
     // join the chat room
     socket.emit('join',{businessId:props.businessId,clientId:props.clientId});

@@ -15,22 +15,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 function ClientDashboard() {
   const [showModal, setShowModal] = useState(false);
   const apiUrl = process.env.REACT_APP_API_URL;
-  const [user, setUser] = useState({
-    // delete soon once we have the user data from login
-    id: '1',
-    firstName: 'xavier',
-    lastName: 'P',
-    email: 'x.p@gmail.com',
-    orgainzation: 'Company XYZ',
-    familySize: 3,
-    preferredLanguage: 'French',
-    role: 'student',
-    followedCompanies: [
-      { id: 1, name: "TechCorp" },
-      { id: 2, name: "FashionHub" },
-      { id: 3, name: "GlobalSolutions" }
-    ]
-  });
+  const [user, setUser] = useState(null);
   const handleOpenModal = () => setShowModal(true);
   const handleCloseModal = () => setShowModal(false);
   const [followedbusiness, setFollowedbusiness] = useState([]);
@@ -41,72 +26,73 @@ function ClientDashboard() {
   const [chatRoomId, setChatRoomId] = useState('');
   const [businessId, setBusinessId] = useState('');
   const [chatRoomBusiness, setChatRoomBusiness] = useState('');
+
+  useEffect(() => {
+    // Retrieve user data from LocalStorage
+    const storedUser = localStorage.getItem('ImmivanRole');
+    console.log(storedUser);
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
+    }
+  }, []);
+
+  useEffect(() => {
+    if (user) {
+      fetchFollowedCompanies();
+
+      const newSocket = io.connect(`${apiUrl}`);
+      let chats =[{}];
+      newSocket.on('chat message', async (msg) => {
+        chats = await axios.post(`${apiUrl}/chats/${user.id}`, {role: "client"});
+        setChatMessages(chats.data);
+        if (msg.senderRole === "business") {
+          console.log("Received message from business:", msg);
+        } else {
+          // make the css notice the new message
+        }
+      })
+    }
+  }, [user]);
   
 
   const fetchFollowedCompanies = async () => {
-      try {
-        // fetch all followed companies
-        await axios.get(`${apiUrl}/clientdashboard/${user.id}`)
-        .then((res) => {
-          console.log("res from fetch followed companies", res.data);
-          let followedbusiness = res.data[0];
-          // based on the response, fetch the chats
-          if (res.data[0] === "No followed businesses") {
-            console.log(res.data[0]);
-            return;
-          }
-          // console.log(res.data[0])
-          let newSocket = io.connect(`${apiUrl}`);
-          (async () => {
-            try {
-              // fetching messages in each chat
-              let chats = await axios.post(`${apiUrl}/chats/${user.id}`, {role: "client"});
-              console.log(chats.data);
-              setChatMessages(chats.data);
-              chats.data.forEach((chat) => {
-                newSocket.emit('join', { businessId: chat.businessId, clientId: user.id });
-              });
-              let merge = [];
-              console.log(res.data[0]);
-              res.data[0].forEach((business) => {
-                let targetChat = chats.data.find((chat) => business.businessId === chat.businessId);
-                console.log(targetChat)
-                business.chatId = targetChat.id;
-                
-                console.log(business)
-                merge.push(business);
-                return business;
-              });
-              console.log(merge);
-              setFollowedbusiness(merge)
-            } catch (error) {
-              console.error("Failed to fetch chats:", error);
-            }
-          })();
-          return followedbusiness;
-        })
-        .then((res) => {
-          // fetch followed companies' posts
-          fetchFollowedCompaniesPosts(res)
-          return res;
-        })
-        .then((res) => {
-          // console.log(res);
-          // fetch recommended companies
-          fetchRecommendedCompanies(res)
-        });
-        // if (result.data[0] !== "No followed businesses") {
-        //   console.log(result.data[0]);
-        //   setFollowedbusiness(result.data[0]);
-        // } else {
-        //   console.log(result.data[0]);
-        //   setFollowedbusiness([]);
-        //     return [];
-        // }
-      } catch (error) {
-        console.error("Failed to fetch businesses:", error);
+    try {
+      const res = await axios.get(`${apiUrl}/clientdashboard/${user.id}`);
+      console.log("res from fetch followed companies", res.data);
+      let followedbusiness = res.data[0];
+      if (res.data[0] === "No followed businesses") {
+        console.log(res.data[0]);
+        return;
       }
-    };
+      let newSocket = io.connect(`${apiUrl}`);
+      try {
+        let chats = await axios.post(`${apiUrl}/chats/${user.id}`, { role: "client" });
+        console.log(chats.data);
+        setChatMessages(chats.data);
+        chats.data.forEach((chat) => {
+          newSocket.emit('join', { businessId: chat.businessId, clientId: user.id });
+        });
+        let merge = [];
+        console.log(res.data[0]);
+        res.data[0].forEach((business) => {
+          let targetChat = chats.data.find((chat) => business.businessId === chat.businessId);
+          console.log(targetChat);
+          business.chatId = targetChat.id;
+          console.log(business);
+          merge.push(business);
+          return business;
+        });
+        console.log(merge);
+        setFollowedbusiness(merge);
+      } catch (error) {
+        console.error("Failed to fetch chats:", error);
+      }
+      fetchFollowedCompaniesPosts(followedbusiness);
+      fetchRecommendedCompanies(followedbusiness);
+    } catch (error) {
+      console.error("Failed to fetch businesses:", error);
+    }
+  };
 
   const fetchFollowedCompaniesPosts = async (followedbusinesses) => {
     // console.log(followedbusinesses);
@@ -142,25 +128,7 @@ function ClientDashboard() {
     } catch (error) {
       console.error("Failed to fetch businesses:", error);
     }
-  }
-
-  useEffect(() => {
-    // fetch followed companies
-    fetchFollowedCompanies();
-
-    const newSocket = io.connect(`${apiUrl}`);
-    let chats =[{}];
-    newSocket.on('chat message', async (msg) => {
-      chats = await axios.post(`${apiUrl}/chats/${user.id}`, {role: "client"});
-      setChatMessages(chats.data);
-      if (msg.senderRole === "business") {
-        console.log("Received message from business:", msg);
-      }else {
-        // make the css notice the new message
-        
-      }
-    })
-  }, []);
+  };
 
   const handleFollow = async (companyId) => {
     console.log("Follow company with ID:", companyId);
@@ -223,6 +191,11 @@ function ClientDashboard() {
     })
   };
   console.log(followedbusiness)
+
+  if (!user) {
+    return <div>Loading...</div>;
+  }
+
   return (
     <Container className="client-dashboard mt-4">
        <div>

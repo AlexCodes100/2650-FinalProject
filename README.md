@@ -49,3 +49,14 @@ CORS_ORIGIN=http://localhost:4000
 npm install
 npm start
 ```
+
+##Give credit 
+```
+We would like to give credit to J Andre Furtado for the amazing picture 
+```
+https://www.pexels.com/photo/woman-draped-in-a-flag-of-canada-2916826/
+
+```
+And we use canvas for creating the logo 
+```
+

@@ -1,14 +1,14 @@
-version: '3.8'
+version: '3.9'
 
 services:
   client:
     build:
       context: ./client
-    image: alexcodes100/2650-finalproject:latest
+    image: alexcodes100/2650-finalproject:client
     ports:
-      - "4000:4000"
+      - "4000:4000" # The internal client port
     environment:
-      - REACT_APP_API_URL=http://server:3000
+      - REACT_APP_API_URL=http://localhost/api
     depends_on:
       - server
     networks:
@@ -17,10 +17,11 @@ services:
   server:
     build:
       context: ./server
-    image: alexcodes100/2650-finalproject:latest
+    image: alexcodes100/2650-finalproject:server
     ports:
       - "3000:3000"
     environment:
+      - PORT=3000
       - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
       - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
       - SESSION_SECRET=${SESSION_SECRET}
@@ -31,32 +32,46 @@ services:
       - SQL_USER=root
       - SQL_PASSWORD=root
       - SQL_DATABASE=db
-      - CORS_ORIGIN=http://client:4000
+      - CORS_ORIGIN=http://localhost:4000
       - JWT_SECRET=${JWT_SECRET}
-      - CLIENT_HOST=http://client:4000
-      - SERVER_HOST=http://server:3000
+      - CLIENT_HOST=http://localhost:4000
+      - SERVER_HOST=http://localhost/api
     depends_on:
       - mysql
       - redis
+    networks:
+      - app-network
+  
+  nginx:
+    build:
+      context: ./nginx
+    image: alexcodes100/2650-finalproject:nginx
+    ports:
+      - "80:80" # Nginx will listen on port 80
+    depends_on:
+      - client
+      - server
     networks:
       - app-network
 
   mysql:
     build:
       context: ./mysql
-    image: alexcodes100/2650-finalproject:latest
+    image: alexcodes100/2650-finalproject:mysql
     ports:
       - "3306:3306"
     environment:
       MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: mydatabase
+      MYSQL_DATABASE: db
+      MYSQL_USER: root
+      MYSQL_PASSWORD: root
     networks:
       - app-network
 
   redis:
     build:
       context: ./redis
-    image: alexcodes100/2650-finalproject:latest
+    image: alexcodes100/2650-finalproject:redis
     ports:
       - "6379:6379"
     environment:

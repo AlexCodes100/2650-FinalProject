@@ -53,6 +53,12 @@ async function startServer() {
 
     // app.locals.pool = pool;
 
+    // Enable CORS
+    app.use(cors({
+      origin: process.env.CORS_ORIGIN,
+      credentials: true,
+    }));
+
     // view engine setup
     app.set("views", path.join("views"));
     app.set("view engine", "pug");
@@ -63,12 +69,7 @@ async function startServer() {
     app.use(cookieParser());
     app.use(express.static(path.join("public")));
 
-    // Enable CORS
-    app.use(cors({
-      origin: process.env.CORS_ORIGIN,
-      credentials: true,
-    }));
-    // app.use(cors());
+
 
     // Passport middleware
     app.use(passport.initialize());
@@ -115,7 +116,7 @@ async function startServer() {
     const server = http.createServer(app);
     const io = new Server(server, {
       cors: {
-        origin: `${clientHost}`,
+        origin: clientHost,
         methods: ["GET", "POST"],
         credentials: true,
       },

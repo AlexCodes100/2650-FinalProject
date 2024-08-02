@@ -44,8 +44,8 @@ const router = createBrowserRouter(
 )
 function App() {
   return (
-    <div style={{ backgroundImage: `url('photos/landing-background.jpg')`, backgroundSize: 'cover', minHeight: '100vh' }}>
-    {/* <div style={{ backgroundColor: '#F4A460	', minHeight: '100vh' }}>  */}
+    // <div style={{ backgroundImage: `url('photos/landing-background.jpg')`, backgroundSize: 'cover', minHeight: '100vh' }}>
+     <div style={{ backgroundColor: '#F4A460	', minHeight: '100vh' }}> 
       <RouterProvider router={router} />
     </div>
   );

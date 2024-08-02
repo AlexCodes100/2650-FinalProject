@@ -5,7 +5,7 @@ function FollowedCompanies(props) {
   const [companies, setCompanies] = useState(props.companies);
 
   useEffect(() => {
-    console.log('companies:', props.companies);
+    // console.log('companies:', props.companies);
   }, [companies]);
   return (
     <Card>

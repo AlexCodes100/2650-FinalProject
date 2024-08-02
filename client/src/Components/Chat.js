@@ -2,6 +2,7 @@ import { useState, useEffect,memo } from 'react';
 import io from 'socket.io-client';
 import { Button, Modal, Form } from 'react-bootstrap';
 import axios from 'axios';
+import './Chat.css';
 
 // const socket = io.connect('${apiUrl}');
 
@@ -34,15 +35,15 @@ const Chat = (props) => {
           clientId: clientId
         }).then((res) => {
           if(res.data.length === 0){
-            console.log("No chat found for this user and business");
-            console.log(res.data);
+            // console.log("No chat found for this user and business");
+            // console.log(res.data);
           } else {
-            console.log(res.data[0].id);
+            // console.log(res.data[0].id);
             setChatId(res.data[0].id);
           }
           return res;
         }).then(async (res) => {
-          console.log("fetching chat");
+          // console.log("fetching chat");
           let result = await axios.get(`${apiUrl}/chats/${res.data[0].id}`);
           setChat(result.data);
           return res;
@@ -53,8 +54,8 @@ const Chat = (props) => {
     return id.data[0].id;
   }
   useEffect(() => {
-    console.log('chatId',props.chatId,'businessId:',props.businessId,
-      'clientId:',props.clientId);
+    // console.log('chatId',props.chatId,'businessId:',props.businessId,
+      // 'clientId:',props.clientId);
       // set business id and client id
     setBusinessId(props.businessId)
     setClientId(props.clientId)
@@ -66,12 +67,12 @@ const Chat = (props) => {
     let tempChatId;
     // if there is no chat id from the props, fetch the chat id
       if (props.chatId === -1) {
-        console.log("chatId id set to -1")
+        // console.log("chatId id set to -1")
         fetchChatId(props.businessId, props.clientId);
-        console.log("tempChatId:",tempChatId);
-        console.log(tempChatId);
+        // console.log("tempChatId:",tempChatId);
+        // console.log(tempChatId);
       } else {
-        console.log("chatId id set to props.chatId:",props.chatId)
+        // console.log("chatId id set to props.chatId:",props.chatId)
         fetchChats(props.chatId);
         setChatId(props.chatId);
         tempChatId = props.chatId;
@@ -79,7 +80,7 @@ const Chat = (props) => {
       socket.on('chat message', async (message) => {
         // console.log('message received:', message);
         if (tempChatId) {
-          console.log('temp chatId:', tempChatId);
+          // console.log('temp chatId:', tempChatId);
           try {
             let result = await axios.get(`${apiUrl}/chats/${tempChatId}`);
             setChat(result.data);
@@ -87,7 +88,7 @@ const Chat = (props) => {
             console.log(err)
           }
         } else {
-          console.log('original chatId:', chatId);
+          // console.log('original chatId:', chatId);
           try {
             let result = await axios.get(`${apiUrl}/chats/${chatId}`);
             setChat(result.data);
@@ -105,14 +106,14 @@ const Chat = (props) => {
       socket.on('chatId', (chatId) => {
         // console.log('chatId:', chatId);
         if (chatId.chatId){
-          console.log("no chatId.chatid")
+          // console.log("no chatId.chatid")
           setChatId(chatId.chatid);
         } else {
-          console.log('Setting chatId:', chatId); 
+          // console.log('Setting chatId:', chatId); 
           setChatId(chatId);
         }
         // let tempChatId = {chatId: chatId};
-        console.log('chatId:', chatId);
+        // console.log('chatId:', chatId);
         // setChatId(tempChatId.chatId);
       });
     // return () => {
@@ -122,7 +123,7 @@ const Chat = (props) => {
 
   const sendMessage = async () => {
     if (message.trim() && props.role === 'business') {
-      console.log(`sending to chatId ${chatId}`);
+      // console.log(`sending to chatId ${chatId}`);
       socket.emit('business chat message', {
         chatId: chatId,
         businessId: businessId,
@@ -132,7 +133,7 @@ const Chat = (props) => {
       setMessage('');
     } else if (message.trim() && props.role === 'client') {
       // console.log(`sending to chatId ${chatId}`);
-      console.log(chatId)
+      // console.log(chatId)
       socket.emit('client chat message', {
         chatId: chatId,
         clientId: clientId,
@@ -142,7 +143,7 @@ const Chat = (props) => {
       setMessage('');
     }
       try {
-        console.log("Sending message to chatId", chatId);
+        // console.log("Sending message to chatId", chatId);
       let result = await axios.get(`${apiUrl}/chats/${chatId}`);
       setChat(result.data);
     } catch (err) {
@@ -151,39 +152,56 @@ const Chat = (props) => {
   };
 
   const MessagesInChat = memo(function MessagesInChat({ chatData }) {
+    // console.log(chatData);
     return chatData.map((chatItem) => (
-      <div key={chatItem.id}>{chatItem.message}</div>
+      props.role === 'client'?
+      (chatItem.senderRole === 'client' ?
+     <div
+      key={chatItem.id}
+      className={`userMessage`}
+    >
+      {chatItem.message}
+    </div>
+    : <div
+      key={chatItem.id}
+      className={`receiverMessage`}
+    >
+      {chatItem.message}
+    </div>):
+    (chatItem.senderRole === 'business' ?
+    <div
+      key={chatItem.id}
+      className={`userMessage`}
+      >
+      {chatItem.message}
+      </div>
+      : <div
+      key={chatItem.id}
+      className={`receiverMessage`}
+      >
+      {chatItem.message}
+      </div>)
     ));
   }, [chat]);
 
   return (
     <div>
       <Modal show={props.showChatModal} onHide={props.handleCloseChatModal}>
-        {/* Chat modal */}
         <Modal.Header closeButton>
           <Modal.Title>Chat with Customer {props.chatRoomClient}</Modal.Title>
         </Modal.Header>
-        {chat?  <MessagesInChat chatData={chat} />:<p>No message yet</p>}
-        {messages}
-        <Modal.Body>
-          <Form>
-            <Form.Group controlId="chatMessage">
-              <Form.Label>Reply</Form.Label>
-              <Form.Control
-              as="textarea"
-              value={message}
-              onChange={(e) => e.target.value.key === 'Enter'? sendMessage():setMessage(e.target.value)}
-              rows={3} />
-            </Form.Group>
-          </Form>
+        <Modal.Body className="chat-container">
+          {chat.length > 0 ? <MessagesInChat chatData={chat} /> : <p>No message yet</p>}
         </Modal.Body>
         <Modal.Footer>
-          <Button
-          variant="secondary"
-          onClick={props.handleCloseChatModal}>Close</Button>
-          <Button
-          variant="primary"
-          onClick={sendMessage}>Send</Button>
+          <Form.Control
+            as="textarea"
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            rows={3}
+            placeholder="Type your message here..."
+          />
+          <Button variant="primary" onClick={sendMessage}>Send</Button>
         </Modal.Footer>
       </Modal>
     </div>

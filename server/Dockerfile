@@ -25,4 +25,4 @@ RUN chmod +x /usr/local/bin/wait-for-it.sh
 EXPOSE 3000
 
 # Command to run the app using wait-for-it
-CMD ["wait-for-it.sh", "mysql:3306", "--", "node", "server.js"]
+CMD ["sh", "-c", "wait-for-it.sh mysql:3306 -- node server.js"]

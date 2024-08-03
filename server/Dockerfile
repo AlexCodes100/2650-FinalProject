@@ -4,8 +4,8 @@ FROM node:18
 # Create and change to the app directory
 WORKDIR /app
 
-# Install bash
-RUN apt-get update && apt-get install -y bash
+# Install bash and dos2unix
+RUN apt-get update && apt-get install -y bash dos2unix
 
 # Copy the package.json and package-lock.json (if available)
 COPY package*.json ./
@@ -18,6 +18,7 @@ COPY . .
 
 # Copy wait-for-it script
 COPY wait-for-it.sh /usr/local/bin/wait-for-it.sh
+RUN dos2unix /usr/local/bin/wait-for-it.sh
 RUN chmod +x /usr/local/bin/wait-for-it.sh
 
 # Expose the port the app runs on

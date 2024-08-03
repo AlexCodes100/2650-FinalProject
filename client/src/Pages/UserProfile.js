@@ -39,13 +39,13 @@ function UserProfile(props) {
 
     try {
       let result = await axios.put(`${apiUrl}/clientdashboard/${user.id}`, {updatedProfile});
-      console.log(result)
+      // console.log(result)
       if (result.data[0].result === "successful") {
-        console.log(result.data[0].message)
+        // console.log(result.data[0].message)
         setUpdating(false);
       } else {
         setError(true);
-        console.log(result.data[0].message)
+        // console.log(result.data[0].message)
       }
     } catch (err) {
       console.log("Error occured during updating client profile: ", err)

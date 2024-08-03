@@ -131,15 +131,15 @@ function BusinessDashBoard () {
     updatedInfo.email = updatedBusiness.email;
 
     try {
-      console.log(business.id)
+      // console.log(business.id)
       let result = await axios.put(`${apiUrl}/businessdashboard/${business.id}`, {updatedInfo});
-      console.log(result)
+      // console.log(result)
       if (result.data[0].result === "successful") {
-        console.log(result.data[0].message)
+        // console.log(result.data[0].message)
         setShowModal(false)
       } else {
         setError(true);
-        console.log(result.data[0].message)
+        // console.log(result.data[0].message)
       }
       
     } catch (err) {

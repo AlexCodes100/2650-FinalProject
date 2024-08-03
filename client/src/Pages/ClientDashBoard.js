@@ -122,7 +122,7 @@ function ClientDashboard() {
         // console.log(result.data);
         setRecommendedBusinesses(result.data);
       } else {
-        console.log(result.data);
+        // console.log(result.data);
         setRecommendedBusinesses([]);
       }
     } catch (error) {
@@ -131,19 +131,19 @@ function ClientDashboard() {
   };
 
   const handleFollow = async (companyId) => {
-    console.log("Follow company with ID:", companyId);
+    // console.log("Follow company with ID:", companyId);
     await axios.post(`${apiUrl}/clientdashboard/${user.id}`, {action: "follow business", businessId: companyId})
     .then((res) => {
       if (res.data.result === "success") {
-        console.log(res.data.message);
-        // window.location.reload();
+        // console.log(res.data.message);
+        window.location.reload();
       }
     })
     .then(async () => {
       // fetch id chat exists
       await axios.post(`${apiUrl}/chats/`, {businessId: companyId, clientId: user.id})
       .then(async (res) => { 
-        console.log("fetched chat result from following a business ", res.data);
+        // console.log("fetched chat result from following a business ", res.data);
         if (res.data.message === "No chatId found") {
           // make new chat room in database
           await axios.post(`${apiUrl}/chats/`, {action: "create new chat" ,businessId: companyId, clientId: user.id})
@@ -154,14 +154,14 @@ function ClientDashboard() {
   }
 
   const handleOpenChatModal = (e) => {
-    console.log(e.chatId);
+    // console.log(e.chatId);
     if (!e.chatId) {
       
       setChatRoomId(-1);
     } else {
       setChatRoomId(e.chatId);
     }
-    console.log(e);
+    // console.log(e);
     setBusinessId(e.businessId);
     setChatRoomBusiness(e.businessName);
     setShowChatModal(true)
@@ -176,7 +176,7 @@ function ClientDashboard() {
 
 
   const handleUnfollow = async (companyId) => {
-    console.log("Unfollow company with ID:", companyId);
+    // console.log("Unfollow company with ID:", companyId);
     // Add logic to handle unfollow action, such as updating state
     // setUser((prevUser) => ({
     //   ...prevUser,
@@ -185,7 +185,7 @@ function ClientDashboard() {
     await axios.post(`${apiUrl}/clientdashboard/${user.id}`, {action: "unfollow business", businessId: companyId})
     .then((res) => {
       if (res.data.result === "success") {
-        console.log(res.data.message);
+        // console.log(res.data.message);
         window.location.reload();
       }
     })

@@ -42,9 +42,9 @@ function Posts({ posts, business,role}) {
         businessId: business.id,
         title: updatingPostTitle,
         content: updateingPostContent })
-      .then((res) => 
-        console.log(res.data.result)
-      )
+      // .then((res) => 
+      //   console.log(res.data.result)
+      // )
       window.location.reload();
     } catch (error) {
       console.error('Error updating post:', error);
@@ -52,7 +52,7 @@ function Posts({ posts, business,role}) {
   };
 
   const deletePost = async (e) => {
-    console.log(business.id)
+    // console.log(business.id)
     if (window.confirm('Are you sure you want to delete this post?')) {
       try {
         await axios.delete(`${apiUrl}/posts/${e.target.id}`, {

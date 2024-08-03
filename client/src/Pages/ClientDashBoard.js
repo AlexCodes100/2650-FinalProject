@@ -135,6 +135,7 @@ function ClientDashboard() {
     await axios.post(`${apiUrl}/clientdashboard/${user.id}`, {action: "follow business", businessId: companyId})
     .then((res) => {
       if (res.data.result === "success") {
+        fetchFollowedCompanies();
         // console.log(res.data.message);
         window.location.reload();
       }
@@ -185,6 +186,7 @@ function ClientDashboard() {
     await axios.post(`${apiUrl}/clientdashboard/${user.id}`, {action: "unfollow business", businessId: companyId})
     .then((res) => {
       if (res.data.result === "success") {
+        fetchFollowedCompanies();
         // console.log(res.data.message);
         window.location.reload();
       }

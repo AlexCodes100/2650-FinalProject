@@ -12,18 +12,11 @@ function NavBar() {
 
   useEffect(() => {
     const token = localStorage.getItem('authToken');
-    if (token) {
-      axios.get(`${apiUrl}/auth/user`, {
-        headers: { Authorization: `Bearer ${token}` }
-      })
-      .then(response => {
-        setUser(response.data.user);
-        setLoggedIn(true);
-      })
-      .catch(error => {
-        console.error('Error fetching user info:', error);
-        handleLogout();
-      });
+    const storedUser = localStorage.getItem('ImmivanRole');
+
+    if (token && storedUser) {
+      setUser(JSON.parse(storedUser));
+      setLoggedIn(true);
     }
   }, []);
 
@@ -45,7 +38,6 @@ function NavBar() {
             <Link to="/about" className="nav-link btn btn-light mx-2">About</Link>
             {loggedIn ? (
               <DropdownButton id="dropdown-basic-button" title={`Hi, ${user.firstName}`} variant="light">
-                <Dropdown.Item as={Link} to="/profile">Profile</Dropdown.Item>
                 <Dropdown.Item as={Link} to={`/${user.role}Dashboard`}>Dashboard</Dropdown.Item>
                 <Dropdown.Item onClick={handleLogout}>Log out</Dropdown.Item>
               </DropdownButton>

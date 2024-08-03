@@ -8,7 +8,7 @@ services:
     ports:
       - "4000:4000" # The internal client port
     environment:
-      - REACT_APP_API_URL=http://server:3000/
+      - REACT_APP_API_URL=http://3.85.135.37:3000/
     depends_on:
       - server
     networks:
@@ -46,10 +46,10 @@ services:
       - SQL_USER=ricardo
       - SQL_PASSWORD=ricardo
       - SQL_DATABASE=db
-      - CORS_ORIGIN=http://client:4000
+      - CORS_ORIGIN=http://3.85.135.37:4000
       - JWT_SECRET=${JWT_SECRET}
-      - CLIENT_HOST=http://client:4000
-      - SERVER_HOST=http://server:3000/
+      - CLIENT_HOST=http://3.85.135.37:4000
+      - SERVER_HOST=http://3.85.135.37:3000/
     depends_on:
       - mysql
       - redis

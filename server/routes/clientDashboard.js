@@ -25,7 +25,7 @@ router.post('/', async (req, res) => {
     }
   } else if (req.body.action === "fetch recommended businesses") {
     try {
-      console.log("fetching recommended businesses")
+      console.log("fetching recommended businesses");
       const [recommendedCompanies] = await pool.query(
         `SELECT b.id, b.businessName, b.businessType FROM business b
         WHERE id NOT IN (?) 
@@ -33,13 +33,13 @@ router.post('/', async (req, res) => {
         LIMIT 3`,
         [followedbusiness]
       );
-      // Limit 3???
-    res.json(recommendedCompanies);
-  } catch (error) {
-    console.error('Error fetching recommended businesses',error) 
-    res.status(500).json({ error: 'Failed to fetch recommended businesses' });
-  }
-};
+      res.json(recommendedCompanies);
+    } catch (error) {
+      console.error('Error fetching recommended businesses', error);
+      res.status(500).json({ error: 'Failed to fetch recommended businesses' });
+    }
+  } 
+});
 
 router.post('/:id', async (req, res) => {
   const userId = parseInt(req.params.id, 10);
@@ -75,7 +75,7 @@ router.post('/:id', async (req, res) => {
   // } catch (error) {
   //   res.status(500).json({ error: 'Failed to fetch recommended businesses' });
   // }
-});
+
 // const [posts] = await pool.query(
     //   `SELECT p.*, b.name as business_name 
     //   FROM posts p 

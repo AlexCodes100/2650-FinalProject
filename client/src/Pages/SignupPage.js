@@ -11,6 +11,22 @@ function SignupPage() {
   const [registrationError, setRegistrationError] = useState("");
   const apiUrl = process.env.REACT_APP_API_URL;
 
+  const handleFollowAndCreateChat = async (userId) => {
+    const companyId = 1; // Business ID to follow
+    try {
+      // Follow the business
+      await axios.post(`${apiUrl}/clientdashboard/${userId}`, { action: "follow business", businessId: companyId });
+
+      // Check if a chat exists and create one if not
+      const chatResponse = await axios.post(`${apiUrl}/chats/`, { businessId: companyId, clientId: userId });
+      if (chatResponse.data.message === "No chatId found") {
+        await axios.post(`${apiUrl}/chats/`, { action: "create new chat", businessId: companyId, clientId: userId });
+      }
+    } catch (error) {
+      console.error('Error following business and creating chat:', error);
+    }
+  };
+
   const formik = useFormik({
     initialValues: {
       firstName: "",
@@ -30,7 +46,7 @@ function SignupPage() {
       password: Yup.string()
         .min(5, "Password must be at least 5 characters long")
         .matches(/[0-9]/, "Password must contain at least 1 numerical character")
-        .matches(/^[!@#$%^&*\-_=+]/, "Password must contain at least 1 symbolic character")
+        .matches(/[!@#$%^&*\-_=+]/, "Password must contain at least 1 symbolic character")
         .required("Password is required"),
       confirmPassword: Yup.string()
         .oneOf([Yup.ref('password'), null], "Passwords must match")
@@ -43,7 +59,9 @@ function SignupPage() {
     onSubmit: async (values) => {
       try {
         setRegistrationError(""); // Clear previous errors
-        await axios.post(`${apiUrl}/register`, values);
+        const response = await axios.post(`${apiUrl}/register`, values);
+        const userId = response.data.userId;
+        await handleFollowAndCreateChat(userId);
         alert("Registration successful");
         navigate("/loginSelection"); // Redirect to login page
       } catch (error) {
@@ -112,7 +130,7 @@ function SignupPage() {
           <ul className="password-requirements">
             <li className={formik.values.password.length >= 5 ? 'valid' : 'invalid'}>Password must be at least 5 characters long.</li>
             <li className={/[0-9]/.test(formik.values.password) ? 'valid' : 'invalid'}>Password must contain at least 1 numerical character.</li>
-            <li className={/^[!@#$%^&*\-_=+]/.test(formik.values.password) ? 'valid' : 'invalid'}>Password must contain at least 1 symbolic character.</li>
+            <li className={/[!@#$%^&*\-_=+]/.test(formik.values.password) ? 'valid' : 'invalid'}>Password must contain at least 1 symbolic character.</li>
           </ul>
         </div>
         <div className="form-group">

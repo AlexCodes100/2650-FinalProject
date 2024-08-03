@@ -55,8 +55,9 @@ async function startServer() {
 
     // Enable CORS
     app.use(cors({
-      origin: process.env.CORS_ORIGIN,
-      credentials: true,
+      origin: '*', // Allow requests from the client
+      methods: 'GET,POST,OPTIONS',
+      allowedHeaders: 'Origin,X-Requested-With,Content-Type,Accept,Authorization'
     }));
 
     // view engine setup
@@ -116,7 +117,7 @@ async function startServer() {
     const server = http.createServer(app);
     const io = new Server(server, {
       cors: {
-        origin: clientHost,
+        origin: "*",
         methods: ["GET", "POST"],
         credentials: true,
       },

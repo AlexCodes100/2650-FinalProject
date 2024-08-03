@@ -8,9 +8,23 @@ services:
     ports:
       - "4000:4000" # The internal client port
     environment:
-      - REACT_APP_API_URL=http://localhost/api
+      - REACT_APP_API_URL=http://server:3000/
     depends_on:
       - server
+    networks:
+      - app-network
+
+  mysql:
+    build:
+      context: ./mysql
+    image: alexcodes100/2650-finalproject:mysql
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: db
+      MYSQL_USER: ricardo
+      MYSQL_PASSWORD: ricardo
     networks:
       - app-network
 
@@ -29,42 +43,16 @@ services:
       - REDIS_PORT=6379
       - REDIS_PASSWORD=${REDIS_PASSWORD}
       - SQL_HOST=mysql
-      - SQL_USER=root
-      - SQL_PASSWORD=root
+      - SQL_USER=ricardo
+      - SQL_PASSWORD=ricardo
       - SQL_DATABASE=db
-      - CORS_ORIGIN=http://localhost:4000
+      - CORS_ORIGIN=http://client:4000
       - JWT_SECRET=${JWT_SECRET}
-      - CLIENT_HOST=http://localhost:4000
-      - SERVER_HOST=http://localhost/api
+      - CLIENT_HOST=http://client:4000
+      - SERVER_HOST=http://server:3000/
     depends_on:
       - mysql
       - redis
-    networks:
-      - app-network
-  
-  nginx:
-    build:
-      context: ./nginx
-    image: alexcodes100/2650-finalproject:nginx
-    ports:
-      - "80:80" # Nginx will listen on port 80
-    depends_on:
-      - client
-      - server
-    networks:
-      - app-network
-
-  mysql:
-    build:
-      context: ./mysql
-    image: alexcodes100/2650-finalproject:mysql
-    ports:
-      - "3306:3306"
-    environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: db
-      MYSQL_USER: root
-      MYSQL_PASSWORD: root
     networks:
       - app-network
 
@@ -81,4 +69,5 @@ services:
 
 networks:
   app-network:
+    name: app-network
     driver: bridge

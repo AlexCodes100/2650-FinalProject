@@ -10,6 +10,22 @@ const LoginSelectionPage = () => {
   const navigate = useNavigate();
   const apiUrl = process.env.REACT_APP_API_URL;
 
+  const handleFollowAndCreateChat = async (userId) => {
+    const companyId = 1; // Business ID to follow
+    try {
+      // Follow the business
+      await axios.post(`${apiUrl}/clientdashboard/${userId}`, { action: "follow business", businessId: companyId });
+
+      // Check if a chat exists and create one if not
+      const chatResponse = await axios.post(`${apiUrl}/chats/`, { businessId: companyId, clientId: userId });
+      if (chatResponse.data.message === "No chatId found") {
+        await axios.post(`${apiUrl}/chats/`, { action: "create new chat", businessId: companyId, clientId: userId });
+      }
+    } catch (error) {
+      console.error('Error following business and creating chat:', error);
+    }
+  };
+
 
   useEffect(() => {
     const queryParams = new URLSearchParams(window.location.search);
@@ -20,11 +36,12 @@ const LoginSelectionPage = () => {
       axios.get(`${apiUrl}/auth/user`, {
         headers: { Authorization: `Bearer ${token}` }
       })
-      .then(response => {
+      .then(async response => {
         console.log('Received user info from /auth/user:', response.data); // Debug log
         const { user } = response.data;
         if (user.role === 'client') {
           localStorage.setItem('ImmivanRole', JSON.stringify({ ...user, role: 'client' }));
+          await handleFollowAndCreateChat(user.id);
           navigate("/clientDashboard");
         } else if (user.role === 'business') {
           localStorage.setItem('ImmivanRole', JSON.stringify({ ...user, role: 'business' }));

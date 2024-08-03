@@ -81,14 +81,14 @@ router.get('/oauth2/redirect/google', async (req, res) => {
       console.log('User not found, creating new user:', googleUser); // Debug log
       const placeholderPassword = crypto.randomBytes(16).toString('hex');
       const hashedPassword = await bcrypt.hash(placeholderPassword, 10);
-      const [result] = await pool.query(`INSERT INTO users (firstName, lastName, email, password) VALUES (?, ?, ?, ?)`, 
-        [googleUser.given_name, googleUser.family_name, googleUser.email, hashedPassword]);
+      const [result] = await pool.query(`INSERT INTO users (firstName, lastName, email, password, role) VALUES (?, ?, ?, ?)`, 
+        [googleUser.given_name, googleUser.family_name, googleUser.email, hashedPassword], 'client');
       user = { id: result.insertId, firstName: googleUser.given_name, lastName: googleUser.family_name, email: googleUser.email };
     } else {
       user = rows[0];
     }
     console.log('Authenticated user:', user);
-    const token = generateToken({ id: user.id, role: 'client' });
+    const token = generateToken(user);
     console.log('Generated JWT:', token);
     res.redirect(`${clientHost}/googleLoginSuccess?token=${token}`);
   } catch (error) {

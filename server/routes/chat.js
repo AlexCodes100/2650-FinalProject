@@ -123,8 +123,7 @@ router.post("/", async (req, res) => {
     let result;
   const chatId = await fetchChatId(businessId, clientId)
   .then((res) => {
-    console.log(res)
-    
+    console.log(res);
     if (res.length === 0) {
       result = {message: "No chatId found"}
     } else {

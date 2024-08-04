@@ -112,7 +112,7 @@ passport.use(new LocalStrategy(
         if (match) {
           console.log('Authenticated user:', user); // Debug log
           const token = generateToken({ id: user.id, role: 'client' });
-          return done(null, { user, token });
+          return done(null, { user, token }); 
         }
       }
 

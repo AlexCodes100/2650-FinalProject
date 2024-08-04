@@ -16,6 +16,9 @@ RUN npm install
 # Copy the rest of the application files
 COPY . .
 
+# Ensure bcrypt is rebuilt for the correct environment
+RUN npm rebuild bcrypt
+
 # Copy wait-for-it script
 COPY wait-for-it.sh /usr/local/bin/wait-for-it.sh
 RUN dos2unix /usr/local/bin/wait-for-it.sh

@@ -47,11 +47,13 @@ Alternatively create clients by using the sign up page.
 
 ##Give credit 
 ```
-We would like to give credit to J Andre Furtado for the amazing picture 
+We would like to give credit to James Wheeler and Andre Furtado for they amazing pictures 
 ```
 https://www.pexels.com/photo/woman-draped-in-a-flag-of-canada-2916826/
 
+https://www.pexels.com/photo/lake-and-mountain-417074/
 ```
-And we use canvas for creating the logo 
+And we use canvas for creating the logo and banner 
 ```
+
 

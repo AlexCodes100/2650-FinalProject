@@ -10,27 +10,28 @@ const LoginSelectionPage = () => {
   const navigate = useNavigate();
   const apiUrl = "http://localhost:3000";
 
-  const handleFollowAndCreateChat = async (userId) => {
-    const companyId = 1; // Business ID to follow
-    try {
-      // Follow the business
-      await axios.post(`${apiUrl}/clientdashboard/${userId}`, { action: "follow business", businessId: companyId });
-
-      // Check if a chat exists and create one if not
-      const chatResponse = await axios.post(`${apiUrl}/chats/`, { businessId: companyId, clientId: userId });
-      if (chatResponse.data.message === "No chatId found") {
-        await axios.post(`${apiUrl}/chats/`, { action: "create new chat", businessId: companyId, clientId: userId });
-      }
-    } catch (error) {
-      console.error('Error following business and creating chat:', error);
-    }
-  };
-
 
   useEffect(() => {
     const queryParams = new URLSearchParams(window.location.search);
     const token = queryParams.get('token');
     console.log('Extracted token from URL:', token); // Debug log
+
+    const handleFollowAndCreateChat = async (userId) => {
+      const companyId = 1; // Business ID to follow
+      try {
+        // Follow the business
+        await axios.post(`${apiUrl}/clientdashboard/${userId}`, { action: "follow business", businessId: companyId });
+  
+        // Check if a chat exists and create one if not
+        const chatResponse = await axios.post(`${apiUrl}/chats/`, { businessId: companyId, clientId: userId });
+        if (chatResponse.data.message === "No chatId found") {
+          await axios.post(`${apiUrl}/chats/`, { action: "create new chat", businessId: companyId, clientId: userId });
+        }
+      } catch (error) {
+        console.error('Error following business and creating chat:', error);
+      }
+    };
+
     if (token) {
       localStorage.setItem('authToken', token);
       axios.get(`${apiUrl}/auth/user`, {
@@ -53,7 +54,7 @@ const LoginSelectionPage = () => {
         navigate("/errorPage");
       });
     }
-  }, [navigate]);
+  }, [apiUrl, navigate]);
 
   const handleEmailChange = (e) => {
     setEmail(e.target.value);

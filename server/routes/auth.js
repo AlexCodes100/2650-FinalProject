@@ -36,7 +36,7 @@ const authenticateJWT = (req, res, next) => {
 router.get('/login/federated/google', (req, res) => {
   const rootUrl = 'https://accounts.google.com/o/oauth2/v2/auth';
   const options = {
-    redirect_uri: `${apiUrl}/auth/oauth2/redirect/google`,
+    redirect_uri: `http://immivan.com:3000/auth/oauth2/redirect/google`,
     client_id: process.env.GOOGLE_CLIENT_ID,
     access_type: 'offline',
     response_type: 'code',
@@ -59,7 +59,7 @@ router.get('/oauth2/redirect/google', async (req, res) => {
     code,
     client_id: process.env.GOOGLE_CLIENT_ID,
     client_secret: process.env.GOOGLE_CLIENT_SECRET,
-    redirect_uri: `${apiUrl}/auth/oauth2/redirect/google`,
+    redirect_uri: `http://immivan.com:3000/auth/oauth2/redirect/google`,
     grant_type: 'authorization_code',
   };
 
@@ -90,7 +90,7 @@ router.get('/oauth2/redirect/google', async (req, res) => {
     console.log('Authenticated user:', user);
     const token = generateToken(user);
     console.log('Generated JWT:', token);
-    res.redirect(`${clientHost}/googleLoginSuccess?token=${token}`);
+    res.redirect(`http://immivan.com:4000/googleLoginSuccess?token=${token}`);
   } catch (error) {
     console.error('Error exchanging code for tokens:', error);
     res.redirect('/errorPage');

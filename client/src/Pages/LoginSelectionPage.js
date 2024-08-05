@@ -138,13 +138,13 @@ const LoginSelectionPage = () => {
           </div>
           <button type="submit">Login</button>
         </form>
-        {/* <div className="google-sign-in">
+        <div className="google-sign-in">
           <h3>Or sign in with Google</h3>
           <button onClick={handleGoogleSignIn} className="google-button">
             <img src="/photos/google-logo.png" alt="Google logo" className="google-logo" />
             Sign in with Google
           </button>
-        </div> */}
+        </div>
       </div>
     </>
   );

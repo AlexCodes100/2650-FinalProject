@@ -27,7 +27,7 @@ const app = express();
 // Enable CORS
 app.use(cors({
   origin: '*', // Allow requests from the client
-  methods: 'GET,POST,OPTIONS',
+  methods: 'GET,POST,OPTIONS,PUT,DELETE',
   allowedHeaders: 'Origin,X-Requested-With,Content-Type,Accept,Authorization'
 }));
 
@@ -79,7 +79,7 @@ async function startServer() {
     const io = new Server(server, {
       cors: {
         origin: "*",
-        methods: ["GET", "POST"],
+        methods: ["GET", "POST", "OPTIONS", "PUT", "DELETE"],
         credentials: true,
       },
     });

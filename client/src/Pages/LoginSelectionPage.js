@@ -8,7 +8,7 @@ const LoginSelectionPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
-  const apiUrl = "http://localhost:3000";
+  const apiUrl = "http://3.85.135.37:3000";
 
   const handleFollowAndCreateChat = async (userId) => {
     const companyId = 1; // Business ID to follow

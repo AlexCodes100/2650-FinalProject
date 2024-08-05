@@ -6,7 +6,7 @@ function LoginPage () {
   const [password, setPassword] = useState("");
   const [role, setRole] = useState("client");
   const [error, setError] = useState("");
-  const apiUrl = "http://localhost:3000";
+  const apiUrl = "http://3.85.135.37:3000";
 
   const businessRoleChangeHandler = () => {
     setRole("business");

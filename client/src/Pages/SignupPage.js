@@ -9,7 +9,7 @@ import NavBar from "../Components/NavBar";
 function SignupPage() {
   const navigate = useNavigate();
   const [registrationError, setRegistrationError] = useState("");
-  const apiUrl = "http://localhost:3000";
+  const apiUrl = "http://3.85.135.37:3000";
 
   const handleFollowAndCreateChat = async (userId) => {
     const companyId = 1; // Business ID to follow

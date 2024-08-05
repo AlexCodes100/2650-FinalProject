@@ -6,7 +6,7 @@ import './Chat.css';
 
 // const socket = io.connect('${apiUrl}');
 
-const apiUrl = "http://localhost:3000";
+const apiUrl = "http://3.85.135.37:3000";
 
 const Chat = (props) => {
   const [chat, setChat] = useState([]);

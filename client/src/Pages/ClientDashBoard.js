@@ -14,7 +14,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 
 function ClientDashboard() {
   const [showModal, setShowModal] = useState(false);
-  const apiUrl = "http://localhost:3000";
+  const apiUrl = "http://3.85.135.37:3000";
   const [user, setUser] = useState(null);
   const handleOpenModal = () => setShowModal(true);
   const handleCloseModal = () => setShowModal(false);

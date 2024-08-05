@@ -6,7 +6,7 @@ const GoogleLoginSuccess = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
-  const apiUrl = "http://localhost:3000";
+  const apiUrl = "http://3.85.135.37:3000";
 
   useEffect(() => {
     const fetchUserInfo = async () => {

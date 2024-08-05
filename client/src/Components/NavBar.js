@@ -8,7 +8,7 @@ function NavBar() {
   const [loggedIn, setLoggedIn] = useState(false);
   const [user, setUser] = useState(null);
   const navigate = useNavigate();
-  const apiUrl = process.env.REACT_APP_API_URL;
+  const apiUrl = "http://localhost:3000";
 
   useEffect(() => {
     const token = localStorage.getItem('authToken');

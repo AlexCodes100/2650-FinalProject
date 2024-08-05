@@ -5,6 +5,8 @@ services:
     build:
       context: ./client
     image: alexcodes100/2650-finalproject:client
+    ports:
+      - "4000:4000"
     environment:
       - REACT_APP_API_URL=http://nginx/api/
     depends_on:
@@ -30,6 +32,8 @@ services:
     build:
       context: ./server
     image: alexcodes100/2650-finalproject:server
+    ports:
+      - "3000:3000"
     environment:
       - PORT=3000
       - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}

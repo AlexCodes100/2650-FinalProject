@@ -7,7 +7,7 @@ function UserProfile(props) {
   const [updatingUser, setUpdatingUser] = useState(user)
   const [updating, setUpdating] = useState(false);
   const [error, setError] = useState(false);
-  const apiUrl = process.env.REACT_APP_API_URL;
+  const apiUrl = "http://localhost:3000";
 
   useEffect(() => {
     setUser(props.user);

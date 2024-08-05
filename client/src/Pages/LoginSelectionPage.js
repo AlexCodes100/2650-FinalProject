@@ -8,7 +8,7 @@ const LoginSelectionPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
-  const apiUrl = "http://localhost:3000";
+  const apiUrl = "http://3.85.135.37:3000";
 
 
   useEffect(() => {
@@ -106,7 +106,7 @@ const LoginSelectionPage = () => {
   
 
   const handleGoogleSignIn = () => {
-    window.location.href = `${apiUrl}/auth/login/federated/google`;
+    window.location.href = `http://immivan.com:3000/auth/login/federated/google`;
   };
 
   return (

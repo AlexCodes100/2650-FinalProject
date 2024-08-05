@@ -6,7 +6,7 @@ const GoogleLoginSuccess = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
-  const apiUrl = "http://localhost:3000";
+  const apiUrl = "http://immivan.com:3000";
 
   const handleFollowAndCreateChat = async (userId) => {
     const companyId = 1; // Business ID to follow

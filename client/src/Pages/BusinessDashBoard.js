@@ -26,7 +26,7 @@ function BusinessDashBoard () {
   // Error handling
   const [error, setError] = useState(false);
 
-  const apiUrl = "http://localhost:3000";
+  const apiUrl = "http://3.85.135.37:3000";
 
   useEffect(() => {
     // fetch business data

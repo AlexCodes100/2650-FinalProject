@@ -8,6 +8,22 @@ const GoogleLoginSuccess = () => {
   const navigate = useNavigate();
   const apiUrl = "http://3.85.135.37:3000";
 
+  const handleFollowAndCreateChat = async (userId) => {
+    const companyId = 1; // Business ID to follow
+    try {
+      // Follow the business
+      await axios.post(`${apiUrl}/clientdashboard/${userId}`, { action: "follow business", businessId: companyId });
+
+      // Check if a chat exists and create one if not
+      const chatResponse = await axios.post(`${apiUrl}/chats/`, { businessId: companyId, clientId: userId });
+      if (chatResponse.data.message === "No chatId found") {
+        await axios.post(`${apiUrl}/chats/`, { action: "create new chat", businessId: companyId, clientId: userId });
+      }
+    } catch (error) {
+      console.error('Error following business and creating chat:', error);
+    }
+  };
+
   useEffect(() => {
     const fetchUserInfo = async () => {
       setLoading(true);
@@ -20,6 +36,7 @@ const GoogleLoginSuccess = () => {
           });
           const { user } = response.data;
           localStorage.setItem('ImmivanRole', JSON.stringify({ ...user, role: 'client' }));
+          await handleFollowAndCreateChat(user.id);
           navigate("/clientDashboard");
         } catch (error) {
           console.error('Error fetching user info:', error);

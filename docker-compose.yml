@@ -38,7 +38,7 @@ services:
       - PORT=3000
       - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
       - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
-      - SESSION_SECRET=${SESSION_SECRET}
+      - SESSION_SECRET=cd1f3add13cb5fcaa12f3f8ba818c4b2d35d798920276dbe0483a6560f4cf31f57618a07d37e8676c597a425ba236c3137483fa16d6cf888e6c616e0898a85ac
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - REDIS_PASSWORD=${REDIS_PASSWORD}
@@ -47,7 +47,7 @@ services:
       - SQL_PASSWORD=ricardo
       - SQL_DATABASE=db
       - CORS_ORIGIN=http://nginx
-      - JWT_SECRET=${JWT_SECRET}
+      - JWT_SECRET=Mj8kPWxB9pLYXcYbl8bz8bt9ifZIEm+tTKXpvyYDPos=
       - CLIENT_HOST=http://nginx
       - SERVER_HOST=http://nginx/api/
     depends_on:

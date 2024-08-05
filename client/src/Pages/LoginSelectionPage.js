@@ -8,7 +8,7 @@ const LoginSelectionPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
-  const apiUrl = process.env.REACT_APP_API_URL;
+  const apiUrl = "http://localhost:3000";
 
 
   useEffect(() => {
@@ -67,16 +67,35 @@ const LoginSelectionPage = () => {
   const handleLogin = (e) => {
     e.preventDefault();
     console.log('Attempting to log in with email:', email); // Debug log
+  
     axios.post(`${apiUrl}/auth/login`, { email, password })
       .then(response => {
+        console.log('Received response from login API:', response); // Debug log
+  
+        if (!response.data) {
+          throw new Error('No data received from login API');
+        }
+  
         const { token, user } = response.data;
+        
+        if (!token) {
+          throw new Error('Token not received');
+        }
+  
+        if (!user) {
+          throw new Error('User data not received');
+        }
+  
         localStorage.setItem('authToken', token);
+  
         if (user.role === 'client') {
           localStorage.setItem('ImmivanRole', JSON.stringify({ ...user, role: 'client' }));
           navigate("/clientDashboard");
         } else if (user.role === 'business') {
           localStorage.setItem('ImmivanRole', JSON.stringify({ ...user, role: 'business' }));
           navigate("/businessDashboard");
+        } else {
+          throw new Error('Unknown user role');
         }
       })
       .catch(error => {
@@ -84,6 +103,7 @@ const LoginSelectionPage = () => {
         navigate("/errorPage");
       });
   };
+  
 
   const handleGoogleSignIn = () => {
     window.location.href = `${apiUrl}/auth/login/federated/google`;

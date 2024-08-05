@@ -6,7 +6,7 @@ import './Chat.css';
 
 // const socket = io.connect('${apiUrl}');
 
-const apiUrl = process.env.REACT_APP_API_URL;
+const apiUrl = "http://localhost:3000";
 
 const Chat = (props) => {
   const [chat, setChat] = useState([]);

@@ -9,7 +9,7 @@ function Posts({ posts, business,role}) {
   const [updatePostId, setUpdatePostId] = useState(-1);
   const [updatingPostTitle, setUpdatingPostTitle] = useState("");
   const [updateingPostContent, setUpdatingPostContent] = useState("");
-  const apiUrl = process.env.REACT_APP_API_URL;
+  const apiUrl = "http://localhost:3000";
 
   const changingPostContent = (e) => {
     setUpdatingPostContent(e.target.value)

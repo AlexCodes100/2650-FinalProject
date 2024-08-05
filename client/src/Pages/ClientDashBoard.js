@@ -27,35 +27,7 @@ function ClientDashboard() {
   const [businessId, setBusinessId] = useState('');
   const [chatRoomBusiness, setChatRoomBusiness] = useState('');
 
-  useEffect(() => {
-    // Retrieve user data from LocalStorage
-    const storedUser = localStorage.getItem('ImmivanRole');
-    console.log(storedUser);
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    }
-  }, []);
-
-  useEffect(() => {
-    if (user) {
-      fetchFollowedCompanies();
-
-      const newSocket = io.connect(`${apiUrl}`);
-      let chats =[{}];
-      newSocket.on('chat message', async (msg) => {
-        chats = await axios.post(`${apiUrl}/chats/${user.id}`, {role: "client"});
-        setChatMessages(chats.data);
-        if (msg.senderRole === "business") {
-          console.log("Received message from business:", msg);
-        } else {
-          // make the css notice the new message
-        }
-      })
-    }
-  }, [user]);
-  
-
-  const fetchFollowedCompanies = async () => {
+  const fetchFollowedCompanies = async (user) => {
     try {
       const res = await axios.get(`${apiUrl}/clientdashboard/${user.id}`);
       console.log("res from fetch followed companies", res.data);
@@ -87,12 +59,64 @@ function ClientDashboard() {
       } catch (error) {
         console.error("Failed to fetch chats:", error);
       }
-      fetchFollowedCompaniesPosts(followedbusiness);
-      fetchRecommendedCompanies(followedbusiness);
+      try {
+        fetchFollowedCompaniesPosts(followedbusiness);
+      } catch (error) {
+        console.error("Failed to fetch posts:", error);
+      }
+      try {
+        fetchRecommendedCompanies(followedbusiness);
+      } catch (error) {
+        console.error("Failed to fetch businesses:", error);
+      }
     } catch (error) {
       console.error("Failed to fetch businesses:", error);
     }
   };
+
+
+  useEffect(() => {
+    // Retrieve user data from LocalStorage
+    const storedUser = JSON.parse(localStorage.getItem('ImmivanRole'));
+    console.log(storedUser);
+    if (storedUser) {
+      setUser(storedUser);
+      fetchFollowedCompanies(storedUser);
+
+      const newSocket = io.connect(`${apiUrl}`);
+      let chats =[{}];
+      newSocket.on('chat message', async (msg) => {
+        chats = await axios.post(`${apiUrl}/chats/${storedUser.id}`, {role: "client"});
+        setChatMessages(chats.data);
+        if (msg.senderRole === "business") {
+          console.log("Received message from business:", msg);
+        } else {
+          // make the css notice the new message
+        }
+      })
+    }
+  }, []);
+
+  // useEffect(() => {
+  //   if (user) {
+  //     fetchFollowedCompanies();
+
+  //     const newSocket = io.connect(`${apiUrl}`);
+  //     let chats =[{}];
+  //     newSocket.on('chat message', async (msg) => {
+  //       chats = await axios.post(`${apiUrl}/chats/${user.id}`, {role: "client"});
+  //       setChatMessages(chats.data);
+  //       if (msg.senderRole === "business") {
+  //         console.log("Received message from business:", msg);
+  //       } else {
+  //         // make the css notice the new message
+  //       }
+  //     })
+  //   }
+  // }, [user]);
+  
+
+  
 
   const fetchFollowedCompaniesPosts = async (followedbusinesses) => {
     // console.log(followedbusinesses);
@@ -135,9 +159,9 @@ function ClientDashboard() {
     await axios.post(`${apiUrl}/clientdashboard/${user.id}`, {action: "follow business", businessId: companyId})
     .then((res) => {
       if (res.data.result === "success") {
-        fetchFollowedCompanies();
+        fetchFollowedCompanies(user);
         // console.log(res.data.message);
-        window.location.reload();
+        // window.location.reload();
       }
     })
     .then(async () => {
@@ -186,7 +210,7 @@ function ClientDashboard() {
     await axios.post(`${apiUrl}/clientdashboard/${user.id}`, {action: "unfollow business", businessId: companyId})
     .then((res) => {
       if (res.data.result === "success") {
-        fetchFollowedCompanies();
+        fetchFollowedCompanies(user);
         // console.log(res.data.message);
         window.location.reload();
       }

@@ -7,18 +7,7 @@ import Chat from "../Components/Chat";
 
 function BusinessDashBoard () {
   // Business info
-  const [business, setBusiness] = useState({
-    // delete soon
-    id: '1',
-    businessName: 'canada Immigration',
-    businessType: 'immigration',
-    businessLocation: 'Vancouver',
-    information: 'we help with student visa and PR',
-    contactPerson: 'Mr Jean',
-    telephoneNumber: '234-443-4543',
-    email: 'Immigration@gmail',
-    role: "business"
-  });
+  const [business, setBusiness] = useState({});
   const [updatedBusiness, setUpdatedBusiness] = useState({});
   // Chat feature
   const [socket, setSocket] = useState(null);
@@ -46,14 +35,14 @@ function BusinessDashBoard () {
       setBusiness(data);
       setUpdatedBusiness(data);
     } else {
-      setUpdatedBusiness(business)
+      setUpdatedBusiness(data)
     }
 
     // fetch chat
     const newSocket = io.connect(`${apiUrl}`);
     setSocket(socket);
     let chats = [{}];
-    (async () => {
+    (async (business) => {
       try {
         chats = await axios.post(`${apiUrl}/chats/${business.id}`, {role: business.role});
         setChatMessages(chats.data);
@@ -63,10 +52,10 @@ function BusinessDashBoard () {
       } catch (err) {
         console.log(err);
       }
-      })();
+      })(data);
     
     newSocket.on('chat message', async (msg) => {
-      chats = await axios.post(`${apiUrl}/chats/${business.id}`, {role: business.role});
+      chats = await axios.post(`${apiUrl}/chats/${data.id}`, {role: data.role});
         setChatMessages(chats.data);
       if (msg.senderRole === "client") {
         // make the notice
@@ -75,7 +64,7 @@ function BusinessDashBoard () {
     
     // business post
     let companiesPosts = [{}];
-    (async () => {
+    (async (business) => {
       try {
         companiesPosts = await axios.get(`${apiUrl}/posts/${business.id}`);
         setPosts(companiesPosts.data);
@@ -83,7 +72,7 @@ function BusinessDashBoard () {
         setError('An error occurred while fetching posts');
         console.error('Error fetching posts:', err);
       }
-    })();
+    })(data);
     return () => newSocket.disconnect(); // ???
   }, []);
 

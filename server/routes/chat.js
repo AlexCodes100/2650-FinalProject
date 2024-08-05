@@ -50,7 +50,7 @@ router.post("/:id", async (req, res) => {
   console.log("fetching chats");
   const id = parseInt(req.params.id, 10);
   const role = req.body.role;
-  // console.log(id, role);
+  console.log(id, role);
   let chats = await fetchChats(id, role);
   if (chats.length === 0) {
     console.log("No chats found for this userrrr");
